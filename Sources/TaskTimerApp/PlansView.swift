@@ -14,10 +14,8 @@ struct PlansView: View {
             guard !task.isCompleted,
                   let dueDate = task.dueDate else { return false }
 
-            // Show tasks due in the next 7 days
             return dueDate >= today && dueDate <= nextWeek
         }.sorted { task1, task2 in
-            // Sort by due date, then by priority
             guard let date1 = task1.dueDate, let date2 = task2.dueDate else { return false }
             if date1 != date2 {
                 return date1 < date2
@@ -29,15 +27,15 @@ struct PlansView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Add Plan Section
-            HStack(spacing: 12) {
+            HStack(spacing: DesignSystem.Spacing.oneAndHalf) {
                 TextField("Add a new plan...", text: $newPlanTitle)
                     .textFieldStyle(.plain)
-                    .font(.system(size: 15))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(12)
+                    .font(DesignSystem.Typography.callout)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
+                    .padding(.horizontal, DesignSystem.Spacing.md)
+                    .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                    .background(DesignSystem.Colors.interactive)
+                    .cornerRadius(DesignSystem.CornerRadius.medium)
                 
                 Button(action: {
                     if !newPlanTitle.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -47,47 +45,47 @@ struct PlansView: View {
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 28))
-                        .foregroundColor(.white)
+                        .foregroundColor(DesignSystem.Colors.accent)
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(newPlanTitle.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .padding(.top, 30)
+            .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
+            .padding(.vertical, DesignSystem.Spacing.md)
+            .padding(.top, DesignSystem.Spacing.xl)
             
             Divider()
-                .background(Color.gray.opacity(0.3))
+                .background(DesignSystem.Colors.divider)
 
             // Upcoming Tasks Section
             if !upcomingTasks.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.oneAndHalf) {
                     HStack {
                         Text("Upcoming Tasks")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .font(DesignSystem.Typography.headline)
+                            .foregroundColor(DesignSystem.Colors.textPrimary)
 
                         Spacer()
 
                         Text("\(upcomingTasks.count) upcoming")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(DesignSystem.Typography.caption1)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
+                    .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
+                    .padding(.top, DesignSystem.Spacing.md)
 
                     ScrollView {
-                        LazyVStack(spacing: 8) {
+                        LazyVStack(spacing: DesignSystem.Spacing.sm) {
                             ForEach(upcomingTasks) { task in
                                 UpcomingTaskRow(task: task)
-                                    .padding(.horizontal, 20)
+                                    .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
                             }
                         }
                     }
                     .frame(maxHeight: 200)
 
                     Divider()
-                        .background(Color.gray.opacity(0.3))
+                        .background(DesignSystem.Colors.divider)
                 }
             }
 
@@ -99,16 +97,16 @@ struct PlansView: View {
 
                     if activePlans.isEmpty && completedPlans.isEmpty {
                         Text("No plans yet")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                            .padding(.top, 40)
+                            .font(DesignSystem.Typography.subheadline)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
+                            .padding(.top, DesignSystem.Spacing.xl)
                     } else {
                         if !activePlans.isEmpty {
                             Section {
                                 ForEach(activePlans) { plan in
                                     PlanRow(plan: plan)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, DesignSystem.Spacing.md)
+                                        .padding(.vertical, DesignSystem.Spacing.sm)
                                 }
                             }
                         }
@@ -117,8 +115,8 @@ struct PlansView: View {
                             Section {
                                 ForEach(completedPlans) { plan in
                                     PlanRow(plan: plan)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, DesignSystem.Spacing.md)
+                                        .padding(.vertical, DesignSystem.Spacing.sm)
                                 }
                             }
                         }
@@ -134,31 +132,31 @@ struct PlanRow: View {
     @EnvironmentObject var taskManager: TaskManager
 
     var body: some View {
-        // Get the current plan state from taskManager to ensure reactivity
         let currentPlan = taskManager.plans.first { $0.id == plan.id } ?? plan
 
-        return HStack(spacing: 14) {
+        return HStack(spacing: DesignSystem.Spacing.md) {
             // Completion Button
             Button(action: {
                 taskManager.togglePlanCompletion(plan)
             }) {
                 Image(systemName: currentPlan.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 24))
-                    .foregroundColor(currentPlan.isCompleted ? .green : .gray)
+                    .foregroundColor(currentPlan.isCompleted ? DesignSystem.Colors.success : DesignSystem.Colors.textTertiary)
             }
             .buttonStyle(PlainButtonStyle())
 
             // Plan Title
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(currentPlan.title)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(DesignSystem.Typography.callout)
+                    .fontWeight(.medium)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
                     .strikethrough(currentPlan.isCompleted)
 
                 if let completedAt = currentPlan.completedAt {
                     Text("Completed on \(formatDate(completedAt))")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .font(DesignSystem.Typography.caption1)
+                        .foregroundColor(DesignSystem.Colors.textTertiary)
                 }
             }
 
@@ -170,24 +168,21 @@ struct PlanRow: View {
             }) {
                 Image(systemName: "trash")
                     .font(.system(size: 18))
-                    .foregroundColor(.red)
+                    .foregroundColor(DesignSystem.Colors.error)
                     .frame(width: 32, height: 32)
-                    .background(Color.red.opacity(0.1))
-                    .cornerRadius(8)
+                    .background(DesignSystem.Colors.error.opacity(0.1))
+                    .cornerRadius(DesignSystem.CornerRadius.small)
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 14)
-        .background(currentPlan.isCompleted ? Color.gray.opacity(0.1) : Color.gray.opacity(0.15))
-        .cornerRadius(12)
+        .padding(.horizontal, DesignSystem.Spacing.md + 2)
+        .padding(.vertical, DesignSystem.Spacing.md)
+        .background(currentPlan.isCompleted ? DesignSystem.Colors.surface : DesignSystem.Colors.interactive)
+        .cornerRadius(DesignSystem.CornerRadius.medium)
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
+        DateFormatter.shortDate.string(from: date)
     }
 }
 
@@ -196,31 +191,32 @@ struct UpcomingTaskRow: View {
     @EnvironmentObject var taskManager: TaskManager
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: DesignSystem.Spacing.oneAndHalf) {
             // Priority indicator
             Circle()
-                .fill(priorityColor)
+                .fill(Color.taskPriority(task.priority))
                 .frame(width: 8, height: 8)
 
             // Task info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(task.title)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(DesignSystem.Typography.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
                     .lineLimit(1)
 
-                HStack(spacing: 8) {
+                HStack(spacing: DesignSystem.Spacing.sm) {
                     Text(task.category)
-                        .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                        .font(DesignSystem.Typography.tiny)
+                        .foregroundColor(DesignSystem.Colors.textTertiary)
 
                     if let dueDate = task.dueDate {
                         Text("•")
-                            .font(.system(size: 11))
-                            .foregroundColor(.gray)
+                            .font(DesignSystem.Typography.tiny)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
 
                         Text(formatDueDate(dueDate))
-                            .font(.system(size: 11))
+                            .font(DesignSystem.Typography.tiny)
                             .foregroundColor(dueDateColor(dueDate))
                     }
                 }
@@ -234,22 +230,14 @@ struct UpcomingTaskRow: View {
             }) {
                 Image(systemName: "checkmark.circle")
                     .font(.system(size: 18))
-                    .foregroundColor(.green)
+                    .foregroundColor(DesignSystem.Colors.success)
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(10)
-    }
-
-    private var priorityColor: Color {
-        switch task.priority {
-        case .high: return .red
-        case .medium: return .orange
-        case .low: return .green
-        }
+        .padding(.horizontal, DesignSystem.Spacing.md)
+        .padding(.vertical, DesignSystem.Spacing.sm + 2)
+        .background(DesignSystem.Colors.surface)
+        .cornerRadius(DesignSystem.CornerRadius.subtle + 6)
     }
 
     private func formatDueDate(_ date: Date) -> String {
@@ -259,20 +247,18 @@ struct UpcomingTaskRow: View {
         } else if calendar.isDateInTomorrow(date) {
             return "Tomorrow"
         } else {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .short
-            return formatter.string(from: date)
+            return DateFormatter.shortDate.string(from: date)
         }
     }
 
     private func dueDateColor(_ date: Date) -> Color {
         let calendar = Calendar.current
         if calendar.isDateInToday(date) {
-            return .orange
+            return DesignSystem.Colors.warning
         } else if date < Date() {
-            return .red
+            return DesignSystem.Colors.error
         } else {
-            return .gray
+            return DesignSystem.Colors.textTertiary
         }
     }
 }

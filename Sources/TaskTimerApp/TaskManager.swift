@@ -221,6 +221,29 @@ final class TaskManager: ObservableObject {
             print("TaskManager: Failed to save task completion: \(error.localizedDescription)")
         }
     }
+
+    func markTaskAsComplete(_ task: TaskItem) {
+        guard let taskIndex = tasks.firstIndex(where: { $0.id == task.id }) else {
+            print("TaskManager: Task not found for completion: \(task.id)")
+            return
+        }
+
+        tasks[taskIndex].isCompleted = true
+        tasks[taskIndex].completedAt = Date()
+
+        invalidateCache()
+
+        if task.recurringPattern != .none {
+            startRecurringTaskTimer()
+        }
+
+        do {
+            try storage.saveTasks(tasks)
+            print("TaskManager: Marked task '\(tasks[taskIndex].title)' as complete")
+        } catch {
+            print("TaskManager: Failed to save task completion: \(error.localizedDescription)")
+        }
+    }
     
     func deleteTasks(withIds taskIds: [UUID]) {
         tasks.removeAll { taskIds.contains($0.id) }

@@ -165,25 +165,16 @@ struct TaskItem: Identifiable, Codable, Hashable {
     var formattedDueDate: String {
         guard let dueDate = dueDate else { return "No due date" }
         
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
-        
         if let dueTime = dueTime {
-            let timeFormatter = DateFormatter()
-            timeFormatter.timeStyle = .short
-            return "\(dateFormatter.string(from: dueDate)) at \(timeFormatter.string(from: dueTime))"
+            return "\(DateFormatter.mediumDate.string(from: dueDate)) at \(DateFormatter.shortTime.string(from: dueTime))"
         }
         
-        return dateFormatter.string(from: dueDate)
+        return DateFormatter.mediumDate.string(from: dueDate)
     }
     
     var formattedDueDateShort: String {
         guard let dueDate = dueDate else { return "" }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .none
-        return formatter.string(from: dueDate)
+        return DateFormatter.shortDate.string(from: dueDate)
     }
     
     // MARK: - Helper Methods
@@ -262,18 +253,12 @@ struct Plan: Identifiable, Codable {
     }
     
     var formattedCreationDate: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .none
-        return formatter.string(from: createdAt)
+        DateFormatter.shortDate.string(from: createdAt)
     }
     
     var formattedCompletionDate: String? {
         guard let completedAt = completedAt else { return nil }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .none
-        return formatter.string(from: completedAt)
+        return DateFormatter.shortDate.string(from: completedAt)
     }
 }
 

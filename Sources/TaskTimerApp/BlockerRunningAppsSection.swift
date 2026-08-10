@@ -6,20 +6,20 @@ struct RunningAppsSection: View {
     var body: some View {
         VStack(spacing: 0) {
             // Search Bar
-            HStack(spacing: 12) {
+            HStack(spacing: DesignSystem.Spacing.oneAndHalf) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
 
                 TextField("Search running apps...", text: $appBlockerManager.searchText)
                     .textFieldStyle(PlainTextFieldStyle())
-                    .foregroundColor(.white)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
 
                 if !appBlockerManager.searchText.isEmpty {
                     Button(action: {
                         appBlockerManager.searchText = ""
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -28,28 +28,28 @@ struct RunningAppsSection: View {
                     appBlockerManager.refreshRunningApps()
                 }) {
                     Image(systemName: "arrow.clockwise")
-                        .foregroundColor(.blue)
+                        .foregroundColor(DesignSystem.Colors.timerActive)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(10)
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
+            .padding(.horizontal, DesignSystem.Spacing.md)
+            .padding(.vertical, DesignSystem.Spacing.sm + 2)
+            .background(DesignSystem.Colors.interactive)
+            .cornerRadius(DesignSystem.CornerRadius.subtle + 6)
+            .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
+            .padding(.top, DesignSystem.Spacing.md)
+            .padding(.bottom, DesignSystem.Spacing.oneAndHalf)
             
             // Running Apps List
             if appBlockerManager.filteredRunningApps.isEmpty {
-                VStack(spacing: 12) {
+                VStack(spacing: DesignSystem.Spacing.oneAndHalf) {
                     Image(systemName: "app.dashed")
                         .font(.system(size: 48))
-                        .foregroundColor(.gray)
+                        .foregroundColor(DesignSystem.Colors.textTertiary)
                     
                     Text("No running apps found")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                        .font(DesignSystem.Typography.subheadline)
+                        .foregroundColor(DesignSystem.Colors.textTertiary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -57,8 +57,8 @@ struct RunningAppsSection: View {
                     LazyVStack(spacing: 0) {
                         ForEach(appBlockerManager.filteredRunningApps) { app in
                             RunningAppRow(app: app)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 8)
+                                .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
+                                .padding(.vertical, DesignSystem.Spacing.sm)
                         }
                     }
                 }
@@ -76,33 +76,34 @@ struct RunningAppRow: View {
     }
     
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: DesignSystem.Spacing.md) {
             // Icon
             if let icon = app.icon {
                 Image(nsImage: icon)
                     .resizable()
                     .frame(width: 40, height: 40)
-                    .cornerRadius(8)
+                    .cornerRadius(DesignSystem.CornerRadius.small)
             } else {
                 Rectangle()
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(DesignSystem.Colors.interactiveHover)
                     .frame(width: 40, height: 40)
-                    .cornerRadius(8)
+                    .cornerRadius(DesignSystem.CornerRadius.small)
             }
             
             // App Info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(app.name)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(DesignSystem.Typography.callout)
+                    .fontWeight(.medium)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
                 
                 Text(app.bundleID)
-                    .font(.system(size: 11))
-                    .foregroundColor(.gray)
+                    .font(DesignSystem.Typography.tiny)
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
                 
                 Text("PID: \(app.pid)")
-                    .font(.system(size: 10))
-                    .foregroundColor(.gray.opacity(0.8))
+                    .font(DesignSystem.Typography.tiny)
+                    .foregroundColor(DesignSystem.Colors.textQuaternary)
             }
             
             Spacer()
@@ -117,13 +118,13 @@ struct RunningAppRow: View {
             }) {
                 Image(systemName: isBlocked ? "lock.open.fill" : "lock.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(isBlocked ? .green : .red)
+                    .foregroundColor(isBlocked ? DesignSystem.Colors.success : DesignSystem.Colors.error)
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(isBlocked ? Color.green.opacity(0.1) : Color.gray.opacity(0.15))
-        .cornerRadius(12)
+        .padding(.horizontal, DesignSystem.Spacing.md)
+        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+        .background(isBlocked ? DesignSystem.Colors.success.opacity(0.1) : DesignSystem.Colors.interactive)
+        .cornerRadius(DesignSystem.CornerRadius.medium)
     }
 }

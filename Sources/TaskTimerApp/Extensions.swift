@@ -99,6 +99,30 @@ extension Color {
     }
 }
 
+// MARK: - Shared Date Formatters
+extension DateFormatter {
+    static let mediumDate: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    static let shortDate: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    static let shortTime: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+}
+
 // MARK: - View Extensions
 extension View {
     @ViewBuilder
@@ -118,6 +142,15 @@ extension View {
         }
     }
     #endif
+}
+
+// MARK: - Shared Window Utilities
+func ensureWindowFocus() {
+    NSApp.activate(ignoringOtherApps: true)
+    if let window = NSApp.keyWindow {
+        window.makeKey()
+        window.orderFrontRegardless()
+    }
 }
 
 // MARK: - Timer State
