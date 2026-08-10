@@ -4,6 +4,8 @@ import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var appBlockerManager: AppBlockerManager?
     private var mainWindow: NSWindow?
+    private var originalWindowFrame: NSRect?
+    private let titleBarHeight: CGFloat = 28
 
     func isInUnclosableMode() -> Bool {
         return appBlockerManager?.isUnclosableMode ?? false
@@ -49,6 +51,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.standardWindowButton(.closeButton)?.isHidden = isUnclosable
         window.standardWindowButton(.miniaturizeButton)?.isHidden = isUnclosable
         window.standardWindowButton(.zoomButton)?.isHidden = isUnclosable
+
+        animateTitleBarCollapse(isUnclosable: isUnclosable, window: window)
+    }
+
+    private func animateTitleBarCollapse(isUnclosable: Bool, window: NSWindow) {
+        if isUnclosable && originalWindowFrame == nil {
+            // Collapse: store original frame, then shrink from the top
+            originalWindowFrame = window.frame
+            var newFrame = window.frame
+            newFrame.size.height -= titleBarHeight
+            newFrame.origin.y += titleBarHeight
+            window.setFrame(newFrame, display: true, animate: true)
+        } else if !isUnclosable && originalWindowFrame != nil {
+            // Expand: restore original frame
+            window.setFrame(originalWindowFrame!, display: true, animate: true)
+            originalWindowFrame = nil
+        }
     }
 
     // MARK: - NSWindowDelegate
