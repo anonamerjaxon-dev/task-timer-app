@@ -13,14 +13,13 @@ struct BlockerView: View {
                 }
                 BlockerTabButton(title: "Running Apps", isSelected: selectedTab == 1) {
                     selectedTab = 1
-                    // Refresh running apps when tab is selected
                     appBlockerManager.refreshRunningApps()
                 }
             }
-            .background(Color.black)
+            .background(DesignSystem.Colors.background)
 
             Divider()
-                .background(Color.gray.opacity(0.3))
+                .background(DesignSystem.Colors.divider)
 
             // Content
             Group {
@@ -33,7 +32,6 @@ struct BlockerView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear {
-            // Initial refresh when view appears
             appBlockerManager.refreshRunningApps()
         }
     }
@@ -47,17 +45,18 @@ struct BlockerTabButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                .foregroundColor(isSelected ? .white : .gray)
+                .font(DesignSystem.Typography.subheadline)
+                .fontWeight(isSelected ? .semibold : .regular)
+                .foregroundColor(isSelected ? DesignSystem.Colors.textPrimary : DesignSystem.Colors.textTertiary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, DesignSystem.Spacing.md)
                 .background(
                     Rectangle()
-                        .fill(isSelected ? Color.blue : Color.clear)
+                        .fill(isSelected ? DesignSystem.Colors.timerActive : Color.clear)
                         .frame(height: 3)
                         .offset(y: 15)
                 )
-                .contentShape(Rectangle()) // 确保整个按钮区域都可点击
+                .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
     }

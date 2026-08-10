@@ -11,11 +11,7 @@ struct PriorityBadge: View {
     }
 
     private var priorityColor: Color {
-        switch priority {
-        case .high: return DesignSystem.Colors.priorityHigh
-        case .medium: return DesignSystem.Colors.priorityMedium
-        case .low: return DesignSystem.Colors.priorityLow
-        }
+        Color.taskPriority(priority)
     }
 }
 
@@ -80,9 +76,7 @@ struct TaskRowView: View {
     }
 
     private func formatDueDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        DateFormatter.mediumDate.string(from: date)
     }
 
     private func dueDateColor(for date: Date) -> Color {

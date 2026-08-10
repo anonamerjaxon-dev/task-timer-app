@@ -17,13 +17,9 @@ struct TasksView: View {
             tasks = taskManager.tasks.filter { $0.category == selectedCategory && !$0.isCompleted }
         }
 
-        let priorityOrder: [Priority] = [.high, .medium, .low]
         return tasks.sorted { task1, task2 in
-            let index1 = priorityOrder.firstIndex(of: task1.priority) ?? Int.max
-            let index2 = priorityOrder.firstIndex(of: task2.priority) ?? Int.max
-
-            if index1 != index2 {
-                return index1 < index2
+            if task1.priority.sortIndex != task2.priority.sortIndex {
+                return task1.priority.sortIndex < task2.priority.sortIndex
             }
 
             // Same priority, sort by due date

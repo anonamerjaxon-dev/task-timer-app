@@ -8,36 +8,36 @@ struct BlockSection: View {
             // Header
             HStack {
                 Text("Blocked Applications")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
+                    .font(DesignSystem.Typography.headline)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
                 
                 Spacer()
                 
                 if appBlockerManager.isAnyAppBlocked {
                     Text("\(appBlockerManager.currentlyBlockedApps.count) blocked")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .font(DesignSystem.Typography.caption1)
+                        .foregroundColor(DesignSystem.Colors.textTertiary)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(Color.gray.opacity(0.1))
+            .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
+            .padding(.vertical, DesignSystem.Spacing.md)
+            .background(DesignSystem.Colors.surface)
             
             // Blocked Apps List
             VStack(spacing: 0) {
                 if appBlockerManager.currentlyBlockedApps.isEmpty {
-                    VStack(spacing: 12) {
+                    VStack(spacing: DesignSystem.Spacing.oneAndHalf) {
                         Image(systemName: "lock.open")
                             .font(.system(size: 48))
-                            .foregroundColor(.gray)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
 
                         Text("No apps blocked")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .font(DesignSystem.Typography.subheadline)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
 
                         Text("Add apps to block from the Running Apps tab")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray.opacity(0.8))
+                            .font(DesignSystem.Typography.caption1)
+                            .foregroundColor(DesignSystem.Colors.textQuaternary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -45,27 +45,28 @@ struct BlockSection: View {
                         LazyVStack(spacing: 0) {
                             ForEach(appBlockerManager.currentlyBlockedApps) { app in
                                 BlockedAppRow(app: app)
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
+                                    .padding(.vertical, DesignSystem.Spacing.sm)
                             }
                         }
                     }
                 }
 
                 // Unclosable Mode Toggle
-                VStack(spacing: 12) {
+                VStack(spacing: DesignSystem.Spacing.oneAndHalf) {
                     Divider()
-                        .background(Color.gray.opacity(0.3))
+                        .background(DesignSystem.Colors.divider)
 
                     HStack {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                             Text("Unclosable Mode")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.white)
+                                .font(DesignSystem.Typography.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(DesignSystem.Colors.textPrimary)
 
                             Text("App reappears instead of quitting")
-                                .font(.system(size: 11))
-                                .foregroundColor(.gray)
+                                .font(DesignSystem.Typography.tiny)
+                                .foregroundColor(DesignSystem.Colors.textTertiary)
                         }
 
                         Spacer()
@@ -76,9 +77,9 @@ struct BlockSection: View {
                         ))
                         .toggleStyle(SwitchToggleStyle())
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
-                    .background(Color.gray.opacity(0.1))
+                    .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
+                    .padding(.vertical, DesignSystem.Spacing.md)
+                    .background(DesignSystem.Colors.surface)
                 }
             }
         }
@@ -90,34 +91,35 @@ struct BlockedAppRow: View {
     @EnvironmentObject var appBlockerManager: AppBlockerManager
     
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: DesignSystem.Spacing.md) {
             // Icon
             if let icon = app.icon {
                 Image(nsImage: icon)
                     .resizable()
                     .frame(width: 40, height: 40)
-                    .cornerRadius(8)
+                    .cornerRadius(DesignSystem.CornerRadius.small)
             } else {
                 Rectangle()
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(DesignSystem.Colors.interactiveHover)
                     .frame(width: 40, height: 40)
-                    .cornerRadius(8)
+                    .cornerRadius(DesignSystem.CornerRadius.small)
             }
             
             // App Info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 Text(app.name)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(DesignSystem.Typography.callout)
+                    .fontWeight(.medium)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
                 
                 Text(app.bundleID)
-                    .font(.system(size: 11))
-                    .foregroundColor(.gray)
+                    .font(DesignSystem.Typography.tiny)
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
                 
                 if let blockedAt = app.blockedAt {
                     Text("Blocked \(timeAgoString(from: blockedAt))")
-                        .font(.system(size: 10))
-                        .foregroundColor(.red)
+                        .font(DesignSystem.Typography.tiny)
+                        .foregroundColor(DesignSystem.Colors.error)
                 }
             }
             
@@ -129,14 +131,14 @@ struct BlockedAppRow: View {
             }) {
                 Image(systemName: "lock.open.fill")
                     .font(.system(size: 20))
-                    .foregroundColor(.green)
+                    .foregroundColor(DesignSystem.Colors.success)
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color.red.opacity(0.1))
-        .cornerRadius(12)
+        .padding(.horizontal, DesignSystem.Spacing.md)
+        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+        .background(DesignSystem.Colors.error.opacity(0.1))
+        .cornerRadius(DesignSystem.CornerRadius.medium)
     }
     
     private func timeAgoString(from date: Date) -> String {

@@ -25,43 +25,44 @@ struct TaskDetailView: View {
             // Header
             HStack {
                 Text("Task Details")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
+                    .font(DesignSystem.Typography.headline)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
                 
                 Spacer()
                 
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                        .font(DesignSystem.Typography.subheadline)
+                        .foregroundColor(DesignSystem.Colors.textTertiary)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
-            .background(Color.black)
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+            .padding(.vertical, DesignSystem.Spacing.twoAndHalf)
+            .background(DesignSystem.Colors.background)
             
             Divider()
-                .background(Color.gray.opacity(0.3))
+                .background(DesignSystem.Colors.divider)
             
             // Content
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: DesignSystem.Spacing.lg) {
                     // Title
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                         Text("Title")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(DesignSystem.Typography.caption1)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
                         
                         TextField("Enter task title", text: $editingTask.title)
                             .focused($focusedField, equals: .title)
                             .textFieldStyle(.plain)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
+                            .font(DesignSystem.Typography.body)
+                            .fontWeight(.medium)
+                            .foregroundColor(DesignSystem.Colors.textPrimary)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
+                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                            .background(DesignSystem.Colors.interactive)
+                            .cornerRadius(DesignSystem.CornerRadius.medium)
                             .onTapGesture {
                                 focusedField = .title
                                 ensureWindowFocus()
@@ -69,12 +70,12 @@ struct TaskDetailView: View {
                     }
                     
                     // Info Grid
-                    HStack(spacing: 16) {
+                    HStack(spacing: DesignSystem.Spacing.md) {
                         // Category
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                             Text("Category")
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
+                                .font(DesignSystem.Typography.caption1)
+                                .foregroundColor(DesignSystem.Colors.textTertiary)
                             
                             Picker("Category", selection: $editingTask.category) {
                                 ForEach(taskManager.getAllCategories(), id: \.self) { cat in
@@ -83,17 +84,17 @@ struct TaskDetailView: View {
                             }
                             .pickerStyle(.menu)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
+                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                            .background(DesignSystem.Colors.interactive)
+                            .cornerRadius(DesignSystem.CornerRadius.medium)
                         }
                         
                         // Priority
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                             Text("Priority")
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
+                                .font(DesignSystem.Typography.caption1)
+                                .foregroundColor(DesignSystem.Colors.textTertiary)
                             
                             Picker("Priority", selection: $editingTask.priority) {
                                 ForEach(Priority.allCases, id: \.self) { prio in
@@ -102,24 +103,24 @@ struct TaskDetailView: View {
                             }
                             .pickerStyle(.menu)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
+                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                            .background(DesignSystem.Colors.interactive)
+                            .cornerRadius(DesignSystem.CornerRadius.medium)
                         }
                     }
                     
                     // Due Date & Time
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                         Text("Due Date")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(DesignSystem.Typography.caption1)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
                         
                         if let _ = editingTask.dueDate {
                             HStack {
                                 Text(editingTask.formattedDueDate)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.white)
+                                    .font(DesignSystem.Typography.subheadline)
+                                    .foregroundColor(DesignSystem.Colors.textPrimary)
                                 
                                 Spacer()
                                 
@@ -128,15 +129,15 @@ struct TaskDetailView: View {
                                     editingTask.dueTime = nil
                                 }) {
                                     Image(systemName: "trash")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.red)
+                                        .font(DesignSystem.Typography.subheadline)
+                                        .foregroundColor(DesignSystem.Colors.error)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
+                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                            .background(DesignSystem.Colors.interactive)
+                            .cornerRadius(DesignSystem.CornerRadius.medium)
                         } else {
                             Button(action: {
                                 editingTask.dueDate = Date()
@@ -145,22 +146,22 @@ struct TaskDetailView: View {
                                     Image(systemName: "calendar")
                                     Text("Set due date")
                                 }
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
+                                .font(DesignSystem.Typography.subheadline)
+                                .foregroundColor(DesignSystem.Colors.textPrimary)
                             }
                             .buttonStyle(PlainButtonStyle())
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 12)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
+                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                            .background(DesignSystem.Colors.interactive)
+                            .cornerRadius(DesignSystem.CornerRadius.medium)
                         }
                     }
                     
                     // Recurring
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                         Text("Recurring")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(DesignSystem.Typography.caption1)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
                         
                         Picker("Recurring", selection: $editingTask.recurringPattern) {
                             ForEach(RecurringPattern.allCases, id: \.self) { pattern in
@@ -169,20 +170,20 @@ struct TaskDetailView: View {
                         }
                         .pickerStyle(.menu)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 12)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(12)
+                        .padding(.horizontal, DesignSystem.Spacing.md)
+                        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                        .background(DesignSystem.Colors.interactive)
+                        .cornerRadius(DesignSystem.CornerRadius.medium)
                     }
                     
                     // Subtasks
                     if !editingTask.subtasks.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: DesignSystem.Spacing.oneAndHalf) {
                             Text("Subtasks")
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
+                                .font(DesignSystem.Typography.caption1)
+                                .foregroundColor(DesignSystem.Colors.textTertiary)
                             
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                                 ForEach(editingTask.subtasks) { subtask in
                                     HStack {
                                         Button(action: {
@@ -190,33 +191,33 @@ struct TaskDetailView: View {
                                         }) {
                                             Image(systemName: subtask.isCompleted ? "checkmark.circle.fill" : "circle")
                                                 .font(.system(size: 20))
-                                                .foregroundColor(subtask.isCompleted ? .green : .gray)
+                                                .foregroundColor(subtask.isCompleted ? DesignSystem.Colors.success : DesignSystem.Colors.textTertiary)
                                         }
                                         .buttonStyle(PlainButtonStyle())
                                         
                                         Text(subtask.title)
-                                            .font(.system(size: 14))
-                                            .foregroundColor(subtask.isCompleted ? .gray : .white)
+                                            .font(DesignSystem.Typography.subheadline)
+                                            .foregroundColor(subtask.isCompleted ? DesignSystem.Colors.textTertiary : DesignSystem.Colors.textPrimary)
                                             .strikethrough(subtask.isCompleted)
                                         
                                         Spacer()
                                     }
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 10)
-                                    .background(Color.gray.opacity(0.15))
-                                    .cornerRadius(12)
+                                    .padding(.horizontal, DesignSystem.Spacing.md)
+                                    .padding(.vertical, DesignSystem.Spacing.sm + 2)
+                                    .background(DesignSystem.Colors.surface)
+                                    .cornerRadius(DesignSystem.CornerRadius.medium)
                                 }
                             }
                         }
                     }
                     
                     // Status
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                         Text("Status")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(DesignSystem.Typography.caption1)
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
                         
-                        HStack(spacing: 12) {
+                        HStack(spacing: DesignSystem.Spacing.oneAndHalf) {
                             Button(action: {
                                 taskManager.toggleTaskCompletion(task)
                                 dismiss()
@@ -225,14 +226,14 @@ struct TaskDetailView: View {
                                     Image(systemName: editingTask.isCompleted ? "checkmark.circle.fill" : "circle")
                                     Text(editingTask.isCompleted ? "Completed" : "Mark as Complete")
                                 }
-                                .font(.system(size: 14))
-                                .foregroundColor(editingTask.isCompleted ? .green : .white)
+                                .font(DesignSystem.Typography.subheadline)
+                                .foregroundColor(editingTask.isCompleted ? DesignSystem.Colors.success : DesignSystem.Colors.textPrimary)
                             }
                             .buttonStyle(PlainButtonStyle())
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 12)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
+                            .padding(.horizontal, DesignSystem.Spacing.md + 2)
+                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                            .background(DesignSystem.Colors.interactive)
+                            .cornerRadius(DesignSystem.CornerRadius.medium)
                             
                             if !editingTask.isCompleted {
                                 Button(action: {
@@ -243,14 +244,14 @@ struct TaskDetailView: View {
                                         Image(systemName: "checkmark.shield.fill")
                                         Text("Quick Complete")
                                     }
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.white)
+                                    .font(DesignSystem.Typography.subheadline)
+                                    .foregroundColor(DesignSystem.Colors.textPrimary)
                                 }
                                 .buttonStyle(PlainButtonStyle())
-                                .padding(.horizontal, 18)
-                                .padding(.vertical, 12)
-                                .background(Color.gray.opacity(0.2))
-                                .cornerRadius(12)
+                                .padding(.horizontal, DesignSystem.Spacing.md + 2)
+                                .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                                .background(DesignSystem.Colors.interactive)
+                                .cornerRadius(DesignSystem.CornerRadius.medium)
                             }
                         }
                     }
@@ -264,17 +265,17 @@ struct TaskDetailView: View {
                             Image(systemName: "trash")
                             Text("Delete Task")
                         }
-                        .font(.system(size: 14))
-                        .foregroundColor(.red)
+                        .font(DesignSystem.Typography.subheadline)
+                        .foregroundColor(DesignSystem.Colors.error)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 24)
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+                .padding(.vertical, DesignSystem.Spacing.lg)
             }
             
             Divider()
-                .background(Color.gray.opacity(0.3))
+                .background(DesignSystem.Colors.divider)
             
             // Footer
             HStack {
@@ -282,34 +283,27 @@ struct TaskDetailView: View {
                 
                 Button(action: saveChanges) {
                     Text("Save Changes")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 28)
-                        .padding(.vertical, 12)
-                        .background(Color.white)
-                        .cornerRadius(12)
+                        .font(DesignSystem.Typography.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(DesignSystem.Colors.background)
+                        .padding(.horizontal, DesignSystem.Spacing.xl - 4)
+                        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
+                        .background(DesignSystem.Colors.accent)
+                        .cornerRadius(DesignSystem.CornerRadius.medium)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 16)
-            .background(Color.black)
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+            .padding(.vertical, DesignSystem.Spacing.md)
+            .background(DesignSystem.Colors.background)
         }
         .frame(width: 500, height: 600)
-        .background(Color.black)
+        .background(DesignSystem.Colors.background)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 ensureWindowFocus()
                 focusedField = .title
             }
-        }
-    }
-    
-    private func ensureWindowFocus() {
-        NSApp.activate(ignoringOtherApps: true)
-        if let window = NSApp.keyWindow {
-            window.makeKey()
-            window.orderFrontRegardless()
         }
     }
     

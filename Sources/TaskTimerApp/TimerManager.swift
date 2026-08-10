@@ -237,22 +237,7 @@ final class TimerManager: ObservableObject {
     
     // MARK: - Quick Actions
     func markTaskAsComplete(_ task: TaskItem) {
-        guard let taskIndex = taskManager.tasks.firstIndex(where: { $0.id == task.id }) else {
-            print("TimerManager: Task not found for completion: \(task.id)")
-            return
-        }
-
-        taskManager.tasks[taskIndex].isCompleted = true
-        taskManager.tasks[taskIndex].completedAt = Date()
-
-        // Save immediately for critical operations
-        taskManager.invalidateCache()
-        do {
-            try StorageManager.shared.saveTasks(taskManager.tasks)
-            print("TimerManager: Marked task '\(taskManager.tasks[taskIndex].title)' as complete")
-        } catch {
-            print("TimerManager: Failed to save task completion: \(error.localizedDescription)")
-        }
+        taskManager.markTaskAsComplete(task)
     }
     
     // MARK: - Cleanup

@@ -7,12 +7,12 @@ struct ContentView: View {
     @EnvironmentObject var appBlockerManager: AppBlockerManager
     @State private var selectedTab: Tab = .categories
 
-    enum Tab: CaseIterable {
-        case categories
-        case plans
-        case timer
-        case allTasks
-        case block
+    enum Tab: Int, CaseIterable {
+        case categories = 0
+        case plans = 1
+        case timer = 2
+        case allTasks = 3
+        case block = 4
 
         var title: String {
             switch self {
@@ -32,6 +32,10 @@ struct ContentView: View {
             case .allTasks: return "tray.full"
             case .block: return "hand.raised"
             }
+        }
+
+        var shortcut: KeyEquivalent {
+            KeyEquivalent(Character("\(rawValue + 1)"))
         }
     }
     
@@ -55,6 +59,7 @@ struct ContentView: View {
                             selectedTab = tab
                         }
                     }
+                    .keyboardShortcut(tab.shortcut, modifiers: .command)
                 }
             }
             .padding(.horizontal, DesignSystem.Spacing.md)
@@ -101,7 +106,7 @@ struct ContentView: View {
         .onAppear {
             FloatingTimerManager.shared.setTimerManager(timerManager)
         }
-            }
+    }
 }
 
 struct TabButton: View {
@@ -135,6 +140,9 @@ struct TabButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel("\(title) tab")
+        .accessibilityHint("Switch to \(title) view")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
@@ -143,5 +151,6 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
             .environmentObject(TaskManager())
             .environmentObject(TimerManager(taskManager: TaskManager()))
+            .environmentObject(AppBlockerManager())
     }
 }

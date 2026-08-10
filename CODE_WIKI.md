@@ -905,6 +905,315 @@ rm -rf ~/Library/Preferences/com.iflow.tasktimer.*
 
 ---
 
-> **文档版本**: 1.0  
+> **文档版本**: 1.1  
 > **生成日期**: 2026-08-10  
 > **对应项目版本**: TaskTimerApp 1.0.0
+
+---
+
+## 11. Code Optimization Plan (v1 → v1.1)
+
+> **目标分支**: `optimize/v1-code-quality`  
+> **适用技能**: `uicraft` (web-app-development) — UI/设计系统一致性、交互体验、可访问性  
+> **优化范围**: 20 个源文件，约 4700 行代码
+
+---
+
+### 11.1 问题总览
+
+经过对全部 20 个源文件的审计，共发现 **5 大类、40+ 个具体问题**：
+
+| 类别 | 问题数 | 严重程度 | 影响文件数 |
+|------|--------|----------|-----------|
+| UI & 设计系统不一致 | 200+ 处 | **Critical** | 15/20 |
+| 代码重复 (DRY) | 5 处 | **High** | 6/20 |
+| 架构与文件组织 | 4 处 | **High** | 3/20 |
+| 性能问题 | 5 处 | **Medium** | 4/20 |
+| 交互与可访问性 | 5 处 | **Medium** | 8/20 |
+
+---
+
+### 11.2 Phase 1: UI & Design System Consistency (Critical)
+
+**使用技能**: `uicraft` — 统一设计语言、字体层级、色彩系统、间距规范
+
+#### 问题详述
+
+大量视图文件绕过了已有的 `DesignSystem`，直接使用硬编码值：
+
+**1a. 硬编码颜色 (150+ 处)**
+
+以下文件使用了裸 `Color` 值而非 `DesignSystem.Colors.*`：
+
+| 文件 | 硬编码颜色 | 应替换为 |
+|------|-----------|----------|
+| `AddTaskView.swift` | `.white` (30+处), `.gray` (20+处), `.black` (5处), `.blue` (2处) | `DesignSystem.Colors.textPrimary`, `.textSecondary`, `.background` |
+| `TaskDetailView.swift` | `.white` (20+处), `.gray` (18+处), `.black` (5处), `.red` (2处) | `DesignSystem.Colors.*` |
+| `AllTasksView.swift` | `.white` (15+处), `.gray` (12+处), `.red` (3处), `.orange` (2处), `.blue`, `.purple`, `.green` | `DesignSystem.Colors.*` |
+| `PlansView.swift` | `.white` (8处), `.gray` (8处), `.red` (2处), `.orange`, `.green` | `DesignSystem.Colors.*` |
+| `BlockerView.swift` | `.white`, `.gray`, `.blue` | `DesignSystem.Colors.*` |
+| `BlockSection.swift` | `.white` (5处), `.gray` (6处), `.red`, `.green` | `DesignSystem.Colors.*` |
+| `BlockerRunningAppsSection.swift` | `.white` (4处), `.gray` (6处), `.red`, `.green`, `.blue` | `DesignSystem.Colors.*` |
+
+**1b. 硬编码字体 (100+ 处)**
+
+| 文件 | 硬编码字体 | 应替换为 |
+|------|-----------|----------|
+| `AddTaskView.swift` | `.system(size: 12)` → label, `.system(size: 14)` → body, `.system(size: 16)` → input, `.system(size: 18)` → title | `DesignSystem.Typography.footnote/.callout/.body/.headline` |
+| `TaskDetailView.swift` | 同上模式 | `DesignSystem.Typography.*` |
+| `AllTasksView.swift` | `.system(size: 14/15/16/18/20/22)` | `DesignSystem.Typography.*` |
+| `PlansView.swift` | `.system(size: 11/12/14/15/16/18/24/28)` | `DesignSystem.Typography.*` |
+| `BlockerView.swift` | `.system(size: 14)` | `DesignSystem.Typography.subheadline` |
+| `BlockSection.swift` | `.system(size: 10/11/12/14/15/18/48)` | `DesignSystem.Typography.*` |
+| `BlockerRunningAppsSection.swift` | `.system(size: 10/11/14/15/48)` | `DesignSystem.Typography.*` |
+
+**1c. 硬编码间距 (40+ 处)**
+
+| 文件 | 示例 | 应替换为 |
+|------|------|----------|
+| 多个视图 | `.padding(.horizontal, 24)`, `.padding(.vertical, 20)`, `spacing: 12` | `DesignSystem.Spacing.lg`, `.xl`, `.md` |
+
+**修复方案**:
+1. 逐文件替换所有硬编码 `Color` → `DesignSystem.Colors.*`
+2. 逐文件替换所有硬编码 `.system(size:)` → `DesignSystem.Typography.*`
+3. 逐文件替换所有硬编码间距 → `DesignSystem.Spacing.*`
+4. 将 `AddTaskView` 和 `TaskDetailView` 的重复字段样式提取为 `DesignSystem` 的 ViewModifier（如 `DesignSystemTextFieldStyle`、`DesignSystemLabelStyle`）
+
+**预计影响**: 15 个文件，约 300 行变更
+
+---
+
+### 11.3 Phase 2: Code Deduplication (High)
+
+#### 问题 2a: `ensureWindowFocus()` 重复
+
+- **位置**: [AddTaskView.swift](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/AddTaskView.swift#L332-L338) 和 [TaskDetailView.swift](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/TaskDetailView.swift#L308-L314)
+- **问题**: 完全相同的 6 行代码在两个文件中重复
+- **修复**: 提取到 `Extensions.swift` 或新建 `View+WindowFocus.swift` 作为 `View` 扩展
+
+#### 问题 2b: DateFormatter 重复创建 (8+ 处)
+
+- **位置**: `TaskItem.formattedDueDate`, `TaskItem.formattedDueDateShort`, `Plan.formattedCreationDate`, `Plan.formattedCompletionDate`, `PlanCard.formatDate()`, `PlanRow.formatDate()`, `UpcomingTaskRow.formatDueDate()`, `TaskRowView.formatDueDate()`, `BlockedAppRow.timeAgoString()`
+- **问题**: 每次调用都创建新的 `DateFormatter` 实例（已知性能开销大）
+- **修复**: 创建 `DateFormatter+Extensions.swift`，使用静态共享实例
+
+#### 问题 2c: 优先级颜色映射重复 (4 处)
+
+- **位置**: `TaskCard.priorityColor` (AllTasksView), `UpcomingTaskRow.priorityColor` (PlansView), `PriorityBadge` (SharedComponents), `Extensions.Color.taskPriority()`
+- **问题**: 4 处相同映射逻辑
+- **修复**: 统一使用 `Color.taskPriority(_:)` 工厂方法（已在 Extensions.swift 中定义），删除其他位置的内联实现
+
+#### 问题 2d: TaskCard / TaskRow / TaskRowView 重叠
+
+- **位置**: `TasksView.TaskRow` (216 行), `AllTasksView.TaskCard` (271 行), `SharedComponents.TaskRowView` (23 行)
+- **问题**: 三个组件功能重叠但实现不同，`SharedComponents.TaskRowView` 几乎未被使用
+- **修复**: 统一为一个 `TaskRowView`（增强 SharedComponents 版本），删除 `TaskRow` 和 `TaskCard` 的内联定义
+
+#### 问题 2e: PlanCard / PlanRow 重叠
+
+- **位置**: `AllTasksView.PlanCard` (172 行), `PlansView.PlanRow` (132 行)
+- **问题**: 两个计划卡片组件功能几乎相同
+- **修复**: 统一为一个 `PlanRowView` 移至 `SharedComponents.swift`
+
+**预计影响**: 减少约 200 行重复代码
+
+---
+
+### 11.4 Phase 3: Architecture & File Organization (High)
+
+#### 问题 3a: main.swift 过大 (468 行)
+
+- **问题**: 一个文件包含 4 个独立类/结构体
+- **修复**: 拆分为 4 个文件:
+  - `main.swift` → `TaskTimerApp.swift`（仅 `@main` App 入口）
+  - `TaskTimerWindow.swift`（`NSWindow` 子类）
+  - `FloatingTimerManager.swift`（浮动窗口管理）
+  - `AppDelegate.swift`（应用生命周期）
+
+#### 问题 3b: TimerManager 绕过 TaskManager API
+
+- **位置**: [TimerManager.swift#L239-L256](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/TimerManager.swift#L239-L256)
+- **问题**: `markTaskAsComplete` 直接修改 `taskManager.tasks` 数组并调用 `StorageManager.shared.saveTasks()`，绕过了 `TaskManager.toggleTaskCompletion()` 的缓存失效和保存逻辑
+- **修复**: 改为调用 `taskManager.toggleTaskCompletion(task)`
+
+#### 问题 3c: 协议签名不匹配
+
+- **位置**: [Protocols.swift#L54](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/Protocols.swift#L54)
+- **问题**: `AppBlockerManagerProtocol.blockApp` 接受 `RunningApp`，但实际 `AppBlockerManager.blockApp` 接受 `String` (bundleID)
+- **修复**: 统一协议签名或移除未使用的协议
+
+#### 问题 3d: 添加目录结构
+
+```
+Sources/TaskTimerApp/
+├── App/                         # 入口文件
+│   ├── TaskTimerApp.swift
+│   ├── AppDelegate.swift
+│   └── TaskTimerWindow.swift
+├── Models/                      # 数据模型
+│   ├── TaskItem.swift
+│   ├── Category.swift
+│   ├── Plan.swift
+│   ├── PomodoroSession.swift
+│   ├── Subtask.swift
+│   ├── Priority.swift
+│   ├── RecurringPattern.swift
+│   └── BlockerModels.swift
+├── Managers/                    # 业务逻辑
+│   ├── TaskManager.swift
+│   ├── TimerManager.swift
+│   ├── StorageManager.swift
+│   ├── AppBlockerManager.swift
+│   └── FloatingTimerManager.swift
+├── Views/                       # 视图
+│   ├── ContentView.swift
+│   ├── TasksView.swift
+│   ├── AllTasksView.swift
+│   ├── PlansView.swift
+│   ├── TimerView.swift
+│   ├── FloatingTimerWindow.swift
+│   ├── AddTaskView.swift
+│   ├── TaskDetailView.swift
+│   ├── BlockerView.swift
+│   ├── BlockSection.swift
+│   └── RunningAppsSection.swift
+├── DesignSystem/                # 设计系统
+│   ├── DesignSystem.swift
+│   ├── SharedComponents.swift
+│   └── ButtonStyles.swift
+└── Utilities/                   # 工具
+    ├── Extensions.swift
+    ├── DateFormatter+Extensions.swift
+    ├── Protocols.swift
+    └── View+WindowFocus.swift
+```
+
+> 注意: 目录结构变更需要在 `Package.swift` 中更新 `sources` 路径或使用 `path` 配置
+
+---
+
+### 11.5 Phase 4: Performance Optimization (Medium)
+
+#### 问题 4a: AllTasksView 过度计算
+
+- **位置**: [AllTasksView.swift](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/AllTasksView.swift)
+- **问题**: 8 个计算属性（`allTasks`, `allPlans`, `activePlans`, `overdueTasks`, `todayTasks`, `upcomingTasks`, `completedTasks`, `completedPlans`）每次 body 渲染都重新计算，其中 `upcomingTasks` 还包含重复的排序逻辑
+- **修复**: 添加 `@State` 缓存，使用 `.onReceive(taskManager.$tasks)` 仅在数据变化时更新
+
+#### 问题 4b: TasksView 重复过滤排序
+
+- **位置**: [TasksView.swift#L12-L41](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TasksView.swift#L12-L41)
+- **问题**: `filteredTasks` 每次渲染都重新过滤和排序
+- **修复**: 使用 `TaskManager` 的 `getTasks(inCategory:)` + `getAllTasksSortedByPriority()` 方法，或添加缓存
+
+#### 问题 4c: RunningAppRow.isBlocked O(n) 扫描
+
+- **位置**: [BlockerRunningAppsSection.swift#L74-L75](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/BlockerRunningAppsSection.swift#L74-L75)
+- **问题**: 每个 `RunningAppRow` 渲染时都 O(n) 扫描 `blockedApps` 数组
+- **修复**: 在 `AppBlockerManager` 中预计算 `blockedBundleIDs: Set<String>`，O(1) 查找
+
+#### 问题 4d: PlansView 重复计算
+
+- **位置**: [PlansView.swift#L8-L27](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/PlansView.swift#L8-L27)
+- **问题**: `upcomingTasks` 每次渲染重新计算，`activePlans`/`completedPlans` 在 body 中内联计算
+- **修复**: 使用 `TaskManager` 的 `activePlans`/`completedPlans` 计算属性，添加 `upcomingTasks` 缓存
+
+#### 问题 4e: TimeInterval 精度问题
+
+- **位置**: [TimerManager.swift#L65](file:///Users/jackson/Desktop/%20%20%20%20%20/claude/task-timer-app/Sources/TaskTimerApp/TimerManager.swift#L65)
+- **问题**: `currentSessionDuration` 在 `default` 分支返回 `0` (Int)，应返回 `0.0` (Double)
+- **修复**: 改为 `return 0.0`
+
+---
+
+### 11.6 Phase 5: Interaction & Polish (Medium)
+
+**使用技能**: `uicraft` — 交互反馈、动画、键盘导航、无障碍
+
+#### 问题 5a: 缺少键盘快捷键
+
+- **问题**: 应用缺少全局键盘快捷键，用户无法快速切换 Tab、创建任务、启动/暂停计时器
+- **修复**: 添加以下快捷键:
+  - `Cmd+1~5` — 切换 Tab
+  - `Cmd+N` — 新建任务
+  - `Space` — 暂停/继续计时器（在 TimerView 中）
+  - `Cmd+W` — 已在不可关闭模式下拦截，正常模式应让窗口关闭
+
+#### 问题 5b: 缺少无障碍标签
+
+- **问题**: 所有按钮、图标缺少 `.accessibilityLabel()` 和 `.accessibilityHint()`
+- **修复**: 为所有交互元素添加无障碍标签，特别是 SF Symbol 图标按钮
+
+#### 问题 5c: 缺少操作反馈
+
+- **问题**: 任务完成、删除、分类添加等操作没有视觉/触觉反馈
+- **修复**: 添加 `withAnimation` 包裹状态变更，使用 `DesignSystem.Animation.quick/standard`
+
+#### 问题 5d: 缺少错误/成功 Toast
+
+- **问题**: 错误仅通过 `print()` 输出，用户看不到
+- **修复**: 添加简单的 Toast/Banner 组件，在 `StorageManager` 操作失败时显示
+
+#### 问题 5e: 空状态优化
+
+- **问题**: `TasksView` 和 `PlansView` 有空状态但使用硬编码，`TimerView` 空闲状态信息不足
+- **修复**: 统一使用 `SharedComponents.EmptyStateView`，添加 CTA 按钮
+
+---
+
+### 11.7 执行顺序与优先级
+
+```
+Phase 1 (UI Consistency)        ← 首先执行，影响面最大
+  ├── 1a: 替换硬编码颜色
+  ├── 1b: 替换硬编码字体
+  ├── 1c: 替换硬编码间距
+  └── 1d: 提取共享样式
+
+Phase 2 (Deduplication)         ← 消除重复，减少维护成本
+  ├── 2a: 提取 ensureWindowFocus
+  ├── 2b: DateFormatter 静态化
+  ├── 2c: 统一优先级颜色
+  ├── 2d: 统一 TaskCard/TaskRow
+  └── 2e: 统一 PlanCard/PlanRow
+
+Phase 3 (Architecture)          ← 结构调整，依赖 Phase 2 完成
+  ├── 3a: 拆分 main.swift
+  ├── 3b: 修复 TimerManager API
+  ├── 3c: 修复协议签名
+  └── 3d: 添加目录结构
+
+Phase 4 (Performance)           ← 性能优化，不改变行为
+  ├── 4a: AllTasksView 缓存
+  ├── 4b: TasksView 缓存
+  ├── 4c: BlockedApp O(1) 查找
+  ├── 4d: PlansView 缓存
+  └── 4e: 类型修复
+
+Phase 5 (Interaction)           ← 最终打磨
+  ├── 5a: 键盘快捷键
+  ├── 5b: 无障碍标签
+  ├── 5c: 操作反馈动画
+  ├── 5d: Toast 通知
+  └── 5e: 空状态优化
+```
+
+---
+
+### 11.8 风险与回滚
+
+| 风险 | 缓解措施 |
+|------|----------|
+| 目录结构变更导致编译失败 | 在 `Package.swift` 中显式指定 `sources` 路径 |
+| 设计系统替换导致视觉差异 | 逐文件对比，确保语义等价 |
+| 缓存优化导致数据不一致 | 添加 `invalidateCache` 调用点 |
+| 快捷键与系统快捷键冲突 | 仅在应用获得焦点时注册 |
+
+**回滚方案**: 每个 Phase 独立提交，出现问题可单独 revert
+
+---
+
+> **优化计划版本**: 1.0  
+> **计划日期**: 2026-08-10  
+> **预计文件变更**: 18-20 个文件  
+> **预计减少代码行数**: ~300 行（去重 + 拆分）
