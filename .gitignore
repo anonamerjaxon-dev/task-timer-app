@@ -1,0 +1,51 @@
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+*.xcodeproj
+xcuserdata/
+DerivedData/
+.swiftpm/
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.o
+*.d
+*.dia
+*.abi.json
+*.swiftsourceinfo
+*.swiftdoc
+*.swiftmodule
+*.pcm
+output-file-map.json
+*.product/
+Objects.LinkFileList
+ModuleCache/
+description.json
+plugin-tools-description.json
+plugin-tools.yaml
+swift-version-*.txt
+
+# App bundle (built)
+TaskTimerApp.app/
+
+# Icon generation scripts (not needed for build)
+generate_icon.py
+generate_icon_swift.swift
+create_icon.py
+create_icon.swift
+icon.svg
+
+# Temporary fix files
+fix2.txt
+fix3.txt
+fix_terminate.txt
+
+# IDE
+.idea/
+.vscode/
