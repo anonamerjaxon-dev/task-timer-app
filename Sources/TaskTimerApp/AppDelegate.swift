@@ -4,6 +4,8 @@ import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var appBlockerManager: AppBlockerManager?
     private var mainWindow: NSWindow?
+    private var originalWindowFrame: NSRect?
+    private let titleBarHeight: CGFloat = 28
 
     func isInUnclosableMode() -> Bool {
         return appBlockerManager?.isUnclosableMode ?? false
@@ -31,6 +33,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         mainWindow = NSApp.windows.first { $0.level != .floating }
         mainWindow?.delegate = self
         updateWindowButtons()
+
+        // If unclosable mode was persisted as ON, collapse immediately (no animation)
+        if appBlockerManager?.isUnclosableMode == true {
+            originalWindowFrame = mainWindow?.frame
+            if var frame = mainWindow?.frame {
+                frame.size.height -= titleBarHeight
+                mainWindow?.setFrame(frame, display: true)
+            }
+        }
     }
 
     @objc private func handleUnclosableModeChange() {
@@ -48,6 +59,30 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.standardWindowButton(.closeButton)?.isHidden = isUnclosable
         window.standardWindowButton(.miniaturizeButton)?.isHidden = isUnclosable
         window.standardWindowButton(.zoomButton)?.isHidden = isUnclosable
+
+        animateTitleBarCollapse(isUnclosable: isUnclosable, window: window)
+    }
+
+    private func animateTitleBarCollapse(isUnclosable: Bool, window: NSWindow) {
+        if isUnclosable && originalWindowFrame == nil {
+            // Collapse: top edge moves down, bottom edge stays fixed
+            originalWindowFrame = window.frame
+            var newFrame = window.frame
+            newFrame.size.height -= titleBarHeight
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                window.animator().setFrame(newFrame, display: true)
+            }
+        } else if !isUnclosable && originalWindowFrame != nil {
+            // Expand: top edge moves back up, bottom edge stays fixed
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                window.animator().setFrame(originalWindowFrame!, display: true)
+            }
+            originalWindowFrame = nil
+        }
     }
 
     // MARK: - NSWindowDelegate
