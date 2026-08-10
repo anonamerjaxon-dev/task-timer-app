@@ -40,6 +40,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             if var frame = mainWindow?.frame {
                 frame.size.height -= titleBarHeight
                 mainWindow?.setFrame(frame, display: true)
+                mainWindow?.contentView?.setBoundsOrigin(NSPoint(x: 0, y: titleBarHeight))
             }
         }
     }
@@ -65,7 +66,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func animateTitleBarCollapse(isUnclosable: Bool, window: NSWindow) {
         if isUnclosable && originalWindowFrame == nil {
-            // Collapse: top edge moves down, bottom edge stays fixed
+            // Collapse: top edge moves down, content shifts up to keep tabs in place
             originalWindowFrame = window.frame
             var newFrame = window.frame
             newFrame.size.height -= titleBarHeight
@@ -73,13 +74,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 context.duration = 0.25
                 context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 window.animator().setFrame(newFrame, display: true)
+                window.contentView?.animator().setBoundsOrigin(NSPoint(x: 0, y: titleBarHeight))
             }
         } else if !isUnclosable && originalWindowFrame != nil {
-            // Expand: top edge moves back up, bottom edge stays fixed
+            // Expand: top edge moves back up, content shifts back down
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.25
                 context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 window.animator().setFrame(originalWindowFrame!, display: true)
+                window.contentView?.animator().setBoundsOrigin(.zero)
             }
             originalWindowFrame = nil
         }
