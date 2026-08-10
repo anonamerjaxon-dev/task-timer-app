@@ -57,15 +57,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func animateTitleBarCollapse(isUnclosable: Bool, window: NSWindow) {
         if isUnclosable && originalWindowFrame == nil {
-            // Collapse: store original frame, then shrink from the top
+            // Collapse: store original frame, shrink from the top (bottom edge stays fixed)
             originalWindowFrame = window.frame
             var newFrame = window.frame
             newFrame.size.height -= titleBarHeight
-            newFrame.origin.y += titleBarHeight
-            window.setFrame(newFrame, display: true, animate: true)
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                window.animator().setFrame(newFrame, display: true)
+            }
         } else if !isUnclosable && originalWindowFrame != nil {
-            // Expand: restore original frame
-            window.setFrame(originalWindowFrame!, display: true, animate: true)
+            // Expand: restore original frame, top edge expands back up
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                window.animator().setFrame(originalWindowFrame!, display: true)
+            }
             originalWindowFrame = nil
         }
     }
