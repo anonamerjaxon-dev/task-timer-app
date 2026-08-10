@@ -4,7 +4,7 @@ import AppKit
 struct AddTaskView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var taskManager: TaskManager
-    
+
     @State private var title = ""
     @State private var category = "Other"
     @State private var priority: Priority = .medium
@@ -15,15 +15,13 @@ struct AddTaskView: View {
     @State private var recurringPattern: RecurringPattern = .none
     @State private var subtasks: [String] = []
     @State private var newSubtask = ""
-    
+
     @FocusState private var focusedField: FocusableField?
-    
+
     enum FocusableField: Hashable {
-        case title
-        case category
-        case subtask
+        case title, category, subtask
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -31,74 +29,57 @@ struct AddTaskView: View {
                 Text("New Task")
                     .font(DesignSystem.Typography.headline)
                     .foregroundColor(DesignSystem.Colors.textPrimary)
-                
+
                 Spacer()
-                
+
                 Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(DesignSystem.Typography.subheadline)
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 20))
                         .foregroundColor(DesignSystem.Colors.textTertiary)
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(.plain)
             }
-            .padding(.horizontal, DesignSystem.Spacing.lg)
-            .padding(.vertical, DesignSystem.Spacing.twoAndHalf)
-            .background(DesignSystem.Colors.background)
-            
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+
             Divider()
                 .background(DesignSystem.Colors.divider)
-            
+
             // Content
             ScrollView {
-                VStack(spacing: DesignSystem.Spacing.lg) {
+                VStack(spacing: 20) {
                     // Title
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                        Text("Title")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                        
+                    fieldGroup(label: "Title") {
                         TextField("Enter task title", text: $title)
                             .focused($focusedField, equals: .title)
                             .textFieldStyle(.plain)
                             .font(DesignSystem.Typography.body)
                             .fontWeight(.medium)
                             .foregroundColor(DesignSystem.Colors.textPrimary)
-                            .padding(.horizontal, DesignSystem.Spacing.md)
-                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                            .background(DesignSystem.Colors.interactive)
-                            .cornerRadius(DesignSystem.CornerRadius.medium)
-                            .onTapGesture {
-                                ensureWindowFocus()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                    focusedField = .title
-                                }
-                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(DesignSystem.Colors.surfaceHigh)
+                            )
                     }
-                    
+
                     // Category
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                        Text("Category")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                        
-                        HStack(spacing: DesignSystem.Spacing.oneAndHalf) {
+                    fieldGroup(label: "Category") {
+                        HStack(spacing: 10) {
                             TextField("Enter category", text: $category)
                                 .focused($focusedField, equals: .category)
                                 .textFieldStyle(.plain)
                                 .font(DesignSystem.Typography.subheadline)
                                 .foregroundColor(DesignSystem.Colors.textPrimary)
-                                .padding(.horizontal, DesignSystem.Spacing.md)
-                                .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                                .background(DesignSystem.Colors.interactive)
-                                .cornerRadius(DesignSystem.CornerRadius.medium)
-                                .onTapGesture {
-                                    ensureWindowFocus()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                        focusedField = .category
-                                    }
-                                }
-                            
-                            Picker("Existing", selection: $category) {
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(DesignSystem.Colors.surfaceHigh)
+                                )
+
+                            Picker("", selection: $category) {
                                 Text("Select...").tag("")
                                 ForEach(taskManager.getAllCategories(), id: \.self) { cat in
                                     Text(cat).tag(cat)
@@ -106,44 +87,46 @@ struct AddTaskView: View {
                             }
                             .pickerStyle(.menu)
                             .frame(width: 120)
-                            .padding(.horizontal, DesignSystem.Spacing.sm)
-                            .padding(.vertical, DesignSystem.Spacing.sm)
-                            .background(DesignSystem.Colors.interactive)
-                            .cornerRadius(DesignSystem.CornerRadius.medium)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(DesignSystem.Colors.surfaceHigh)
+                            )
                         }
                     }
-                    
+
                     // Priority
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                        Text("Priority")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                        
+                    fieldGroup(label: "Priority") {
                         Picker("Priority", selection: $priority) {
                             ForEach(Priority.allCases, id: \.self) { prio in
-                                Text(prio.displayName).tag(prio)
+                                HStack {
+                                    Circle()
+                                        .fill(Color.taskPriority(prio))
+                                        .frame(width: 8, height: 8)
+                                    Text(prio.displayName)
+                                }
+                                .tag(prio)
                             }
                         }
                         .pickerStyle(.menu)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, DesignSystem.Spacing.md)
-                        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                        .background(DesignSystem.Colors.interactive)
-                        .cornerRadius(DesignSystem.CornerRadius.medium)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(DesignSystem.Colors.surfaceHigh)
+                        )
                     }
-                    
+
                     // Due Date
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                        Text("Due Date")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                        
+                    fieldGroup(label: "Due Date") {
                         HStack {
                             Toggle("", isOn: $hasDueDate)
-                                .toggleStyle(SwitchToggleStyle(tint: DesignSystem.Colors.timerActive))
-                            
+                                .toggleStyle(SwitchToggleStyle(tint: DesignSystem.Colors.accent))
+
                             Spacer()
-                            
+
                             if hasDueDate {
                                 DatePicker("", selection: $dueDate, displayedComponents: .date)
                                     .datePickerStyle(.compact)
@@ -154,25 +137,23 @@ struct AddTaskView: View {
                                     .foregroundColor(DesignSystem.Colors.textTertiary)
                             }
                         }
-                        .padding(.horizontal, DesignSystem.Spacing.md)
-                        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                        .background(DesignSystem.Colors.interactive)
-                        .cornerRadius(DesignSystem.CornerRadius.medium)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(DesignSystem.Colors.surfaceHigh)
+                        )
                     }
-                    
+
                     // Due Time
                     if hasDueDate {
-                        VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                            Text("Due Time")
-                                .font(DesignSystem.Typography.caption1)
-                                .foregroundColor(DesignSystem.Colors.textTertiary)
-                            
+                        fieldGroup(label: "Due Time") {
                             HStack {
                                 Toggle("", isOn: $hasDueTime)
-                                    .toggleStyle(SwitchToggleStyle(tint: DesignSystem.Colors.timerActive))
-                                
+                                    .toggleStyle(SwitchToggleStyle(tint: DesignSystem.Colors.accent))
+
                                 Spacer()
-                                
+
                                 if hasDueTime {
                                     DatePicker("", selection: $dueTime, displayedComponents: .hourAndMinute)
                                         .datePickerStyle(.compact)
@@ -183,19 +164,17 @@ struct AddTaskView: View {
                                         .foregroundColor(DesignSystem.Colors.textTertiary)
                                 }
                             }
-                            .padding(.horizontal, DesignSystem.Spacing.md)
-                            .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                            .background(DesignSystem.Colors.interactive)
-                            .cornerRadius(DesignSystem.CornerRadius.medium)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(DesignSystem.Colors.surfaceHigh)
+                            )
                         }
                     }
-                    
+
                     // Recurring
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                        Text("Recurring")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                        
+                    fieldGroup(label: "Recurring") {
                         Picker("Recurring", selection: $recurringPattern) {
                             ForEach(RecurringPattern.allCases, id: \.self) { pattern in
                                 Text(pattern.displayName).tag(pattern)
@@ -203,125 +182,102 @@ struct AddTaskView: View {
                         }
                         .pickerStyle(.menu)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, DesignSystem.Spacing.md)
-                        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                        .background(DesignSystem.Colors.interactive)
-                        .cornerRadius(DesignSystem.CornerRadius.medium)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(DesignSystem.Colors.surfaceHigh)
+                        )
                     }
-                    
+
                     // Subtasks
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.oneAndHalf) {
-                        Text("Subtasks")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                        
-                        // Add new subtask
-                        HStack(spacing: DesignSystem.Spacing.sm) {
-                            TextField("Add subtask", text: $newSubtask)
-                                .focused($focusedField, equals: .subtask)
-                                .textFieldStyle(.plain)
-                                .font(DesignSystem.Typography.subheadline)
-                                .foregroundColor(DesignSystem.Colors.textPrimary)
-                                .padding(.horizontal, DesignSystem.Spacing.md)
-                                .padding(.vertical, DesignSystem.Spacing.sm + 2)
-                                .background(DesignSystem.Colors.interactive)
-                                .cornerRadius(DesignSystem.CornerRadius.subtle + 6)
-                                .onSubmit {
+                    fieldGroup(label: "Subtasks") {
+                        VStack(spacing: 8) {
+                            HStack(spacing: 8) {
+                                TextField("Add subtask", text: $newSubtask)
+                                    .focused($focusedField, equals: .subtask)
+                                    .textFieldStyle(.plain)
+                                    .font(DesignSystem.Typography.subheadline)
+                                    .foregroundColor(DesignSystem.Colors.textPrimary)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(DesignSystem.Colors.surfaceHigh)
+                                    )
+                                    .onSubmit {
+                                        if !newSubtask.isEmpty {
+                                            subtasks.append(newSubtask)
+                                            newSubtask = ""
+                                        }
+                                    }
+
+                                Button(action: {
                                     if !newSubtask.isEmpty {
                                         subtasks.append(newSubtask)
                                         newSubtask = ""
                                     }
-                                }
-                                .onTapGesture {
-                                    ensureWindowFocus()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                        focusedField = .subtask
-                                    }
-                                }
-                            
-                            Button(action: {
-                                if !newSubtask.isEmpty {
-                                    subtasks.append(newSubtask)
-                                    newSubtask = ""
-                                }
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(DesignSystem.Typography.body)
-                                    .foregroundColor(DesignSystem.Colors.textPrimary)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .padding(.horizontal, DesignSystem.Spacing.md)
-                            .padding(.vertical, DesignSystem.Spacing.sm + 2)
-                            .background(DesignSystem.Colors.interactiveHover)
-                            .cornerRadius(DesignSystem.CornerRadius.subtle + 6)
-                        }
-                        
-                        // List of subtasks
-                        ForEach(Array(subtasks.enumerated()), id: \.offset) { index, subtask in
-                            HStack {
-                                Text(subtask)
-                                    .font(DesignSystem.Typography.subheadline)
-                                    .foregroundColor(DesignSystem.Colors.textPrimary)
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    subtasks.remove(at: index)
                                 }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(DesignSystem.Typography.body)
-                                        .foregroundColor(DesignSystem.Colors.textTertiary)
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(width: 36, height: 36)
+                                        .background(
+                                            Circle()
+                                                .fill(DesignSystem.Colors.accent)
+                                        )
                                 }
-                                .buttonStyle(PlainButtonStyle())
+                                .buttonStyle(.plain)
                             }
-                            .padding(.horizontal, DesignSystem.Spacing.md)
-                            .padding(.vertical, DesignSystem.Spacing.sm + 2)
-                            .background(DesignSystem.Colors.surface)
-                            .cornerRadius(DesignSystem.CornerRadius.subtle + 6)
+
+                            ForEach(Array(subtasks.enumerated()), id: \.offset) { index, subtask in
+                                HStack {
+                                    Text(subtask)
+                                        .font(DesignSystem.Typography.subheadline)
+                                        .foregroundColor(DesignSystem.Colors.textPrimary)
+
+                                    Spacer()
+
+                                    Button(action: { subtasks.remove(at: index) }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(DesignSystem.Colors.textTertiary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(DesignSystem.Colors.surface)
+                                )
+                            }
                         }
                     }
                 }
-                .padding(.horizontal, DesignSystem.Spacing.lg)
-                .padding(.vertical, DesignSystem.Spacing.lg)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
             }
-            
+
             Divider()
                 .background(DesignSystem.Colors.divider)
-            
+
             // Footer
             HStack {
-                Button(action: { dismiss() }) {
-                    Text("Cancel")
-                        .font(DesignSystem.Typography.subheadline)
-                        .foregroundColor(DesignSystem.Colors.textTertiary)
-                        .padding(.horizontal, DesignSystem.Spacing.lg)
-                        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                        .background(DesignSystem.Colors.interactive)
-                        .cornerRadius(DesignSystem.CornerRadius.medium)
-                }
-                .buttonStyle(PlainButtonStyle())
-                
+                Button("Cancel") { dismiss() }
+                    .secondaryButtonStyle()
+
                 Spacer()
-                
-                Button(action: createTaskItem) {
-                    Text("Create Task")
-                        .font(DesignSystem.Typography.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(DesignSystem.Colors.background)
-                        .padding(.horizontal, DesignSystem.Spacing.xl - 4)
-                        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-                        .background(DesignSystem.Colors.accent)
-                        .cornerRadius(DesignSystem.CornerRadius.medium)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .disabled(title.isEmpty)
-                .opacity(title.isEmpty ? 0.5 : 1.0)
+
+                Button("Create Task") { createTaskItem() }
+                    .primaryButtonStyle()
+                    .disabled(title.isEmpty)
+                    .opacity(title.isEmpty ? 0.5 : 1.0)
             }
-            .padding(.horizontal, DesignSystem.Spacing.lg)
-            .padding(.vertical, DesignSystem.Spacing.md)
-            .background(DesignSystem.Colors.background)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
         }
-        .frame(width: 500, height: 600)
+        .frame(width: 520, height: 640)
         .background(DesignSystem.Colors.background)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -330,7 +286,18 @@ struct AddTaskView: View {
             }
         }
     }
-    
+
+    // MARK: - Helpers
+
+    private func fieldGroup<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label.uppercased())
+                .font(DesignSystem.Typography.caption)
+                .foregroundColor(DesignSystem.Colors.textTertiary)
+            content()
+        }
+    }
+
     private func createTaskItem() {
         var task = TaskItem(
             title: title,
@@ -340,18 +307,13 @@ struct AddTaskView: View {
             dueTime: hasDueTime ? dueTime : nil,
             recurringPattern: recurringPattern
         )
-        
-        // Add subtasks
         task.subtasks = subtasks.map { Subtask(title: $0) }
-        
         taskManager.addTask(task)
         dismiss()
     }
 }
 
-struct AddTaskView_Previews: PreviewProvider {
-    static var previews: some View {
-        AddTaskView()
-            .environmentObject(TaskManager())
-    }
+#Preview {
+    AddTaskView()
+        .environmentObject(TaskManager())
 }

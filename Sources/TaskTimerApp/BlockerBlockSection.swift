@@ -2,7 +2,7 @@ import SwiftUI
 
 struct BlockSection: View {
     @EnvironmentObject var appBlockerManager: AppBlockerManager
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -10,147 +10,114 @@ struct BlockSection: View {
                 Text("Blocked Applications")
                     .font(DesignSystem.Typography.headline)
                     .foregroundColor(DesignSystem.Colors.textPrimary)
-                
+
                 Spacer()
-                
+
                 if appBlockerManager.isAnyAppBlocked {
                     Text("\(appBlockerManager.currentlyBlockedApps.count) blocked")
-                        .font(DesignSystem.Typography.caption1)
+                        .font(DesignSystem.Typography.caption)
                         .foregroundColor(DesignSystem.Colors.textTertiary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(DesignSystem.Colors.surfaceHigh))
                 }
             }
-            .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
-            .padding(.vertical, DesignSystem.Spacing.md)
-            .background(DesignSystem.Colors.surface)
-            
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+
             // Blocked Apps List
-            VStack(spacing: 0) {
-                if appBlockerManager.currentlyBlockedApps.isEmpty {
-                    VStack(spacing: DesignSystem.Spacing.oneAndHalf) {
-                        Image(systemName: "lock.open")
-                            .font(.system(size: 48))
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-
-                        Text("No apps blocked")
-                            .font(DesignSystem.Typography.subheadline)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-
-                        Text("Add apps to block from the Running Apps tab")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textQuaternary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(appBlockerManager.currentlyBlockedApps) { app in
-                                BlockedAppRow(app: app)
-                                    .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
-                                    .padding(.vertical, DesignSystem.Spacing.sm)
-                            }
+            if appBlockerManager.currentlyBlockedApps.isEmpty {
+                EmptyState(
+                    icon: "lock.open",
+                    title: "No Apps Blocked",
+                    message: "Add apps to block from the Running Apps tab"
+                )
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 6) {
+                        ForEach(appBlockerManager.currentlyBlockedApps) { app in
+                            BlockedAppRowV2(app: app)
+                                .padding(.horizontal, 24)
                         }
                     }
-                }
-
-                // Unclosable Mode Toggle
-                VStack(spacing: DesignSystem.Spacing.oneAndHalf) {
-                    Divider()
-                        .background(DesignSystem.Colors.divider)
-
-                    HStack {
-                        VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
-                            Text("Unclosable Mode")
-                                .font(DesignSystem.Typography.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(DesignSystem.Colors.textPrimary)
-
-                            Text("App reappears instead of quitting")
-                                .font(DesignSystem.Typography.tiny)
-                                .foregroundColor(DesignSystem.Colors.textTertiary)
-                        }
-
-                        Spacer()
-
-                        Toggle("", isOn: Binding(
-                            get: { appBlockerManager.isUnclosableMode },
-                            set: { _ in appBlockerManager.toggleUnclosableMode() }
-                        ))
-                        .toggleStyle(SwitchToggleStyle())
-                    }
-                    .padding(.horizontal, DesignSystem.Spacing.twoAndHalf)
-                    .padding(.vertical, DesignSystem.Spacing.md)
-                    .background(DesignSystem.Colors.surface)
+                    .padding(.vertical, 8)
                 }
             }
         }
     }
 }
 
-struct BlockedAppRow: View {
+struct BlockedAppRowV2: View {
     let app: BlockedApp
     @EnvironmentObject var appBlockerManager: AppBlockerManager
-    
+
     var body: some View {
-        HStack(spacing: DesignSystem.Spacing.md) {
+        HStack(spacing: 12) {
             // Icon
             if let icon = app.icon {
                 Image(nsImage: icon)
                     .resizable()
-                    .frame(width: 40, height: 40)
-                    .cornerRadius(DesignSystem.CornerRadius.small)
+                    .frame(width: 36, height: 36)
+                    .cornerRadius(8)
             } else {
-                Rectangle()
-                    .fill(DesignSystem.Colors.interactiveHover)
-                    .frame(width: 40, height: 40)
-                    .cornerRadius(DesignSystem.CornerRadius.small)
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(DesignSystem.Colors.surfaceHighest)
+                    .frame(width: 36, height: 36)
             }
-            
+
             // App Info
-            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(app.name)
                     .font(DesignSystem.Typography.callout)
                     .fontWeight(.medium)
                     .foregroundColor(DesignSystem.Colors.textPrimary)
-                
-                Text(app.bundleID)
-                    .font(DesignSystem.Typography.tiny)
-                    .foregroundColor(DesignSystem.Colors.textTertiary)
-                
-                if let blockedAt = app.blockedAt {
-                    Text("Blocked \(timeAgoString(from: blockedAt))")
+
+                HStack(spacing: 6) {
+                    Text(app.bundleID)
                         .font(DesignSystem.Typography.tiny)
-                        .foregroundColor(DesignSystem.Colors.error)
+                        .foregroundColor(DesignSystem.Colors.textTertiary)
+
+                    if let blockedAt = app.blockedAt {
+                        Text("·")
+                            .foregroundColor(DesignSystem.Colors.textTertiary)
+                        Text(timeAgoString(from: blockedAt))
+                            .font(DesignSystem.Typography.tiny)
+                            .foregroundColor(DesignSystem.Colors.error)
+                    }
                 }
             }
-            
+
             Spacer()
-            
+
             // Unblock Button
             Button(action: {
                 appBlockerManager.unblockApp(app.bundleID)
             }) {
                 Image(systemName: "lock.open.fill")
-                    .font(.system(size: 20))
+                    .font(.system(size: 14))
                     .foregroundColor(DesignSystem.Colors.success)
+                    .frame(width: 32, height: 32)
+                    .background(Circle().fill(DesignSystem.Colors.successMuted))
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
         }
-        .padding(.horizontal, DesignSystem.Spacing.md)
-        .padding(.vertical, DesignSystem.Spacing.oneAndHalf)
-        .background(DesignSystem.Colors.error.opacity(0.1))
-        .cornerRadius(DesignSystem.CornerRadius.medium)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(DesignSystem.Colors.errorMuted)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(DesignSystem.Colors.error.opacity(0.15), lineWidth: 1)
+        )
     }
-    
+
     private func timeAgoString(from date: Date) -> String {
         let interval = Date().timeIntervalSince(date)
-        if interval < 60 {
-            return "just now"
-        } else if interval < 3600 {
-            return "\(Int(interval / 60))m ago"
-        } else if interval < 86400 {
-            return "\(Int(interval / 3600))h ago"
-        } else {
-            return "\(Int(interval / 86400))d ago"
-        }
+        if interval < 60 { return "just now" }
+        else if interval < 3600 { return "\(Int(interval / 60))m ago" }
+        else if interval < 86400 { return "\(Int(interval / 3600))h ago" }
+        else { return "\(Int(interval / 86400))d ago" }
     }
 }

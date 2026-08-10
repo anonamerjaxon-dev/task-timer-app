@@ -6,20 +6,21 @@ struct BlockerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab Bar
+            // Header
+            headerView
+
+            // Tab bar
             HStack(spacing: 0) {
-                BlockerTabButton(title: "Block", isSelected: selectedTab == 0) {
+                BlockerTabButtonV2(title: "Block List", isSelected: selectedTab == 0) {
                     selectedTab = 0
                 }
-                BlockerTabButton(title: "Running Apps", isSelected: selectedTab == 1) {
+                BlockerTabButtonV2(title: "Running Apps", isSelected: selectedTab == 1) {
                     selectedTab = 1
                     appBlockerManager.refreshRunningApps()
                 }
             }
-            .background(DesignSystem.Colors.background)
-
-            Divider()
-                .background(DesignSystem.Colors.divider)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 4)
 
             // Content
             Group {
@@ -31,17 +32,35 @@ struct BlockerView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .background(DesignSystem.Colors.background)
         .onAppear {
             appBlockerManager.refreshRunningApps()
         }
     }
+
+    var headerView: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Block")
+                    .font(DesignSystem.Typography.title2)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
+                Text("Manage blocked apps")
+                    .font(DesignSystem.Typography.footnote)
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 24)
+        .padding(.bottom, 16)
+    }
 }
 
-struct BlockerTabButton: View {
+struct BlockerTabButtonV2: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
@@ -49,15 +68,18 @@ struct BlockerTabButton: View {
                 .fontWeight(isSelected ? .semibold : .regular)
                 .foregroundColor(isSelected ? DesignSystem.Colors.textPrimary : DesignSystem.Colors.textTertiary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, DesignSystem.Spacing.md)
+                .padding(.vertical, 10)
                 .background(
-                    Rectangle()
-                        .fill(isSelected ? DesignSystem.Colors.timerActive : Color.clear)
-                        .frame(height: 3)
-                        .offset(y: 15)
+                    VStack {
+                        Spacer()
+                        Rectangle()
+                            .fill(isSelected ? DesignSystem.Colors.accent : Color.clear)
+                            .frame(height: 2)
+                            .cornerRadius(1)
+                    }
                 )
                 .contentShape(Rectangle())
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }

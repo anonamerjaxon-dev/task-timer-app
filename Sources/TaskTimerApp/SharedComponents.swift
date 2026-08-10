@@ -1,20 +1,5 @@
 import SwiftUI
 
-// MARK: - Priority Badge
-struct PriorityBadge: View {
-    let priority: Priority
-
-    var body: some View {
-        Circle()
-            .fill(priorityColor)
-            .frame(width: 8, height: 8)
-    }
-
-    private var priorityColor: Color {
-        Color.taskPriority(priority)
-    }
-}
-
 // MARK: - Task Row View
 struct TaskRowView: View {
     let task: TaskItem
@@ -24,15 +9,13 @@ struct TaskRowView: View {
 
     var body: some View {
         HStack(spacing: DesignSystem.Spacing.sm) {
-            // Completion button
             Button(action: onComplete) {
                 Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(task.isCompleted ? DesignSystem.Colors.success : DesignSystem.Colors.textTertiary)
                     .font(DesignSystem.Typography.callout)
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
 
-            // Task content
             VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                 HStack {
                     Text(task.title)
@@ -42,37 +25,36 @@ struct TaskRowView: View {
 
                     Spacer()
 
-                    PriorityBadge(priority: task.priority)
+                    Circle()
+                        .fill(Color.taskPriority(task.priority))
+                        .frame(width: 8, height: 8)
                 }
 
                 if !task.category.isEmpty {
                     Text(task.category)
-                        .font(DesignSystem.Typography.caption1)
+                        .font(DesignSystem.Typography.caption)
                         .foregroundColor(DesignSystem.Colors.textTertiary)
                 }
 
                 if let dueDate = task.dueDate {
                     Text(formatDueDate(dueDate))
-                        .font(DesignSystem.Typography.caption2)
+                        .font(DesignSystem.Typography.tiny)
                         .foregroundColor(dueDateColor(for: dueDate))
                 }
             }
 
             Spacer()
 
-            // Delete button
             Button(action: onDelete) {
                 Image(systemName: "trash")
                     .foregroundColor(DesignSystem.Colors.textTertiary)
                     .font(DesignSystem.Typography.footnote)
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
         }
         .padding(.vertical, DesignSystem.Spacing.sm)
         .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
-        }
+        .onTapGesture { onTap() }
     }
 
     private func formatDueDate(_ date: Date) -> String {
@@ -80,19 +62,14 @@ struct TaskRowView: View {
     }
 
     private func dueDateColor(for date: Date) -> Color {
-        if task.isCompleted {
-            return DesignSystem.Colors.textTertiary
-        } else if date < Date() {
-            return DesignSystem.Colors.error
-        } else if Calendar.current.isDateInToday(date) {
-            return DesignSystem.Colors.warning
-        } else {
-            return DesignSystem.Colors.textSecondary
-        }
+        if task.isCompleted { return DesignSystem.Colors.textTertiary }
+        else if date < Date() { return DesignSystem.Colors.error }
+        else if Calendar.current.isDateInToday(date) { return DesignSystem.Colors.warning }
+        else { return DesignSystem.Colors.textSecondary }
     }
 }
 
-// MARK: - Section Header
+// MARK: - Section Header View
 struct SectionHeaderView: View {
     let title: String
     let action: (() -> Void)?
@@ -118,38 +95,11 @@ struct SectionHeaderView: View {
                         .font(DesignSystem.Typography.footnote)
                         .foregroundColor(DesignSystem.Colors.accent)
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, DesignSystem.Spacing.md)
         .padding(.vertical, DesignSystem.Spacing.sm)
-    }
-}
-
-// MARK: - Empty State View
-struct EmptyStateView: View {
-    let icon: String
-    let title: String
-    let subtitle: String?
-
-    var body: some View {
-        VStack(spacing: DesignSystem.Spacing.md) {
-            Image(systemName: icon)
-                .font(.system(size: 48))
-                .foregroundColor(DesignSystem.Colors.textTertiary)
-
-            Text(title)
-                .font(DesignSystem.Typography.headline)
-                .foregroundColor(DesignSystem.Colors.textSecondary)
-
-            if let subtitle = subtitle {
-                Text(subtitle)
-                    .font(DesignSystem.Typography.callout)
-                    .foregroundColor(DesignSystem.Colors.textTertiary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(DesignSystem.Spacing.xl)
     }
 }
 
@@ -189,15 +139,17 @@ struct ConfirmationDialog: View {
 
             HStack(spacing: DesignSystem.Spacing.md) {
                 Button("Cancel", action: cancelAction)
-                    .minimalButtonStyle(.secondary)
+                    .secondaryButtonStyle()
 
                 Button("Confirm", action: confirmAction)
-                    .minimalButtonStyle(.destructive)
+                    .destructiveButtonStyle()
             }
         }
         .padding(DesignSystem.Spacing.lg)
-        .background(DesignSystem.Colors.cardBackground)
-        .cornerRadius(DesignSystem.CornerRadius.large)
+        .background(
+            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.large)
+                .fill(DesignSystem.Colors.surface)
+        )
         .shadow(color: DesignSystem.Shadows.medium, radius: 8, x: 0, y: 4)
     }
 }

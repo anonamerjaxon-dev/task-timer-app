@@ -6,7 +6,6 @@ struct TasksView: View {
     @State private var selectedCategory: String = "All"
     @State private var showingAddTask = false
     @State private var showingAddCategory = false
-    @State private var showingTaskDetail: TaskItem?
     @State private var newCategoryName = ""
 
     var filteredTasks: [TaskItem] {
@@ -21,304 +20,342 @@ struct TasksView: View {
             if task1.priority.sortIndex != task2.priority.sortIndex {
                 return task1.priority.sortIndex < task2.priority.sortIndex
             }
-
-            // Same priority, sort by due date
             switch (task1.dueDate, task2.dueDate) {
-            case (nil, nil):
-                return task1.createdAt < task2.createdAt
-            case (nil, _):
-                return false
-            case (_, nil):
-                return true
-            case let (date1?, date2?):
-                return date1 < date2
+            case (nil, nil): return task1.createdAt < task2.createdAt
+            case (nil, _): return false
+            case (_, nil): return true
+            case let (date1?, date2?): return date1 < date2
             }
         }
     }
-    
+
     var categories: [String] {
         ["All"] + taskManager.getAllCategories()
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
-            // Category Selector - Minimalistic
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: DesignSystem.Spacing.sm) {
-                    ForEach(categories, id: \.self) { category in
-                        CategoryButton(
-                            category: category,
-                            isSelected: selectedCategory == category
-                        ) {
-                            withAnimation(DesignSystem.Animation.quick) {
-                                selectedCategory = category
-                            }
-                        } onDelete: {
-                            deleteCategory(category)
-                        }
-                    }
+            // Header
+            headerView
 
-                    // Add category button - Enhanced
-                    Button(action: { showingAddCategory = true }) {
-                        Image(systemName: "plus")
-                            .font(DesignSystem.Typography.subheadline)
-                            .foregroundColor(DesignSystem.Colors.textSecondary)
-                            .frame(width: 32, height: 32) // Larger touch target
-                            .background(DesignSystem.Colors.interactive)
-                            .cornerRadius(DesignSystem.CornerRadius.medium)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                .padding(.horizontal, DesignSystem.Spacing.lg)
-            }
-            .padding(.vertical, DesignSystem.Spacing.md)
-            .background(DesignSystem.Colors.background)
+            // Category filter
+            categoryFilterView
 
-            Divider()
-                .background(DesignSystem.Colors.surface)
-
-            // Task List - Optimized
-            ScrollView {
-                LazyVStack(spacing: DesignSystem.Spacing.xs) {
-                    if filteredTasks.isEmpty {
-                        VStack(spacing: DesignSystem.Spacing.sm) {
-                            Image(systemName: "checkmark.circle")
-                                .font(.system(size: 32))
-                                .foregroundColor(DesignSystem.Colors.textTertiary)
-                            Text("No tasks")
-                                .font(DesignSystem.Typography.headline)
-                                .foregroundColor(DesignSystem.Colors.textSecondary)
-                            Text("Add a task to get started")
-                                .font(DesignSystem.Typography.footnote)
-                                .foregroundColor(DesignSystem.Colors.textTertiary)
-                        }
-                        .padding(.top, DesignSystem.Spacing.xxxl)
-                    } else {
-                        ForEach(filteredTasks) { task in
-                            TaskRow(task: task)
-                                .onTapGesture {
-                                    showingTaskDetail = task
-                                }
-                                .padding(.horizontal, DesignSystem.Spacing.md)
-                        }
-                    }
-                }
-                .padding(.vertical, DesignSystem.Spacing.sm)
-            }
+            // Task list
+            taskListView
         }
+        .background(DesignSystem.Colors.background)
         .sheet(isPresented: $showingAddTask) {
             AddTaskView()
         }
         .sheet(isPresented: $showingAddCategory) {
-            VStack(spacing: 20) {
-                Text("Add Category")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
-                
-                TextField("Category name", text: $newCategoryName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                
-                HStack(spacing: 16) {
-                    Button("Cancel") {
+            addCategorySheet
+        }
+    }
+
+    // MARK: - Header
+
+    var headerView: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Tasks")
+                    .font(DesignSystem.Typography.title2)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
+
+                Text("\(taskManager.tasks.filter { !$0.isCompleted }.count) active")
+                    .font(DesignSystem.Typography.footnote)
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
+            }
+
+            Spacer()
+
+            Button(action: { showingAddTask = true }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 12, weight: .bold))
+                    Text("New Task")
+                        .font(DesignSystem.Typography.subheadline)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DesignSystem.Colors.accent)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 24)
+        .padding(.bottom, 16)
+    }
+
+    // MARK: - Category Filter
+
+    var categoryFilterView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(categories, id: \.self) { category in
+                    Button(action: {
+                        withAnimation(DesignSystem.Animation.quick) {
+                            selectedCategory = category
+                        }
+                    }) {
+                        Text(category)
+                            .font(DesignSystem.Typography.footnote)
+                            .fontWeight(selectedCategory == category ? .semibold : .regular)
+                            .foregroundColor(selectedCategory == category ? .white : DesignSystem.Colors.textSecondary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                Capsule()
+                                    .fill(selectedCategory == category ? DesignSystem.Colors.accent : DesignSystem.Colors.surfaceHigh)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        if category != "All" {
+                            Button(role: .destructive) {
+                                deleteCategory(category)
+                            } label: {
+                                Label("Delete Category", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+
+                Button(action: { showingAddCategory = true }) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(DesignSystem.Colors.textSecondary)
+                        .frame(width: 28, height: 28)
+                        .background(
+                            Circle()
+                                .fill(DesignSystem.Colors.surfaceHigh)
+                                .overlay(Circle().stroke(DesignSystem.Colors.borderSubtle, lineWidth: 1))
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 24)
+        }
+        .padding(.bottom, 12)
+    }
+
+    // MARK: - Task List
+
+    var taskListView: some View {
+        ScrollView {
+            if filteredTasks.isEmpty {
+                EmptyState(
+                    icon: "checkmark.circle",
+                    title: "No Tasks",
+                    message: "Click \"New Task\" to add your first task"
+                )
+                .padding(.top, 40)
+            } else {
+                LazyVStack(spacing: 6) {
+                    ForEach(filteredTasks) { task in
+                        TaskRowV2(task: task)
+                            .padding(.horizontal, 24)
+                    }
+                }
+                .padding(.vertical, 8)
+            }
+        }
+    }
+
+    // MARK: - Add Category Sheet
+
+    var addCategorySheet: some View {
+        VStack(spacing: 20) {
+            Text("New Category")
+                .font(DesignSystem.Typography.headline)
+                .foregroundColor(DesignSystem.Colors.textPrimary)
+
+            TextField("Category name", text: $newCategoryName)
+                .textFieldStyle(.plain)
+                .font(DesignSystem.Typography.body)
+                .foregroundColor(DesignSystem.Colors.textPrimary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(DesignSystem.Colors.surfaceHigh)
+                .cornerRadius(8)
+
+            HStack(spacing: 12) {
+                Button("Cancel") {
+                    showingAddCategory = false
+                    newCategoryName = ""
+                }
+                .secondaryButtonStyle()
+
+                Button("Add") {
+                    if !newCategoryName.trimmingCharacters(in: .whitespaces).isEmpty {
+                        let newCategory = Category(name: newCategoryName.trimmingCharacters(in: .whitespaces))
+                        taskManager.addCategory(newCategory)
                         showingAddCategory = false
                         newCategoryName = ""
                     }
-                    .buttonStyle(.bordered)
-                    
-                    Button("Add") {
-                        if !newCategoryName.trimmingCharacters(in: .whitespaces).isEmpty {
-                            let newCategory = Category(name: newCategoryName.trimmingCharacters(in: .whitespaces))
-                            taskManager.addCategory(newCategory)
-                            showingAddCategory = false
-                            newCategoryName = ""
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(newCategoryName.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
+                .primaryButtonStyle()
+                .disabled(newCategoryName.trimmingCharacters(in: .whitespaces).isEmpty)
             }
-            .padding()
-            .frame(width: 300, height: 200)
         }
-        .sheet(item: $showingTaskDetail) { task in
-            TaskDetailView(task: task)
-        }
-        .overlay(
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Button(action: { showingAddTask = true }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(DesignSystem.Colors.background)
-                            .frame(width: 60, height: 60) // Larger touch target
-                            .background(DesignSystem.Colors.accent)
-                            .cornerRadius(30)
-                            .shadow(color: DesignSystem.Shadows.medium, radius: 12, x: 0, y: 6)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.trailing, DesignSystem.Spacing.lg)
-                    .padding(.bottom, DesignSystem.Spacing.lg)
-                }
-            }
-        )
+        .padding(24)
+        .frame(width: 320, height: 200)
+        .background(DesignSystem.Colors.background)
     }
-    
+
+    // MARK: - Helpers
+
     func deleteCategory(_ category: String) {
         taskManager.deleteCategory(named: category)
-        
-        // Reset to All category if we deleted the selected one
         if selectedCategory == category {
             selectedCategory = "All"
         }
     }
 }
 
-struct CategoryButton: View {
-    let category: String
-    let isSelected: Bool
-    let action: () -> Void
-    let onDelete: () -> Void
+// MARK: - Task Row V2
 
-    var body: some View {
-        Button(action: action) {
-            Text(category)
-                .font(DesignSystem.Typography.caption1)
-                .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundColor(isSelected ? DesignSystem.Colors.background : DesignSystem.Colors.textPrimary)
-                .padding(.horizontal, DesignSystem.Spacing.sm)
-                .padding(.vertical, DesignSystem.Spacing.xs)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? DesignSystem.Colors.accent : DesignSystem.Colors.interactive)
-                )
-                .contentShape(Capsule())
-        }
-        .buttonStyle(PlainButtonStyle())
-        .contextMenu {
-            if category != "All" {
-                Button(role: .destructive) {
-                    onDelete()
-                } label: {
-                    Label("Delete Category", systemImage: "trash")
-                }
-            }
-        }
-    }
-}
-
-struct TaskRow: View {
+struct TaskRowV2: View {
     let task: TaskItem
     @EnvironmentObject var taskManager: TaskManager
     @EnvironmentObject var timerManager: TimerManager
+    @State private var showingDetail = false
 
     var body: some View {
-        HStack(spacing: DesignSystem.Spacing.sm) {
-            // Priority Indicator - Enhanced
-            RoundedRectangle(cornerRadius: 2)
-                .fill(Color.taskPriority(task.priority))
-                .frame(width: 4) // Slightly thicker
+        Button(action: { showingDetail = true }) {
+            HStack(spacing: 12) {
+                // Priority bar
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.taskPriority(task.priority))
+                    .frame(width: 3)
 
-            // Task Info
-            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
-                Text(task.title)
-                    .font(DesignSystem.Typography.callout) // Larger font
-                    .fontWeight(.medium)
-                    .foregroundColor(DesignSystem.Colors.textPrimary)
-                    .strikethrough(task.isCompleted)
-
-                HStack(spacing: DesignSystem.Spacing.sm) {
-                    Text(task.category)
-                        .font(DesignSystem.Typography.caption1) // Larger
-                        .foregroundColor(DesignSystem.Colors.textSecondary) // Better contrast
-
-                    if task.isOverdue {
-                        Text("Overdue")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.error)
-                    } else if task.isDueToday {
-                        Text("Today")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.warning)
-                    } else if task.dueDate != nil {
-                        Text(task.formattedDueDateShort)
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                    }
-
-                    if task.recurringPattern != .none {
-                        Image(systemName: "repeat")
-                            .font(DesignSystem.Typography.caption1)
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-                    }
-                }
-
-                // Subtasks Progress - Minimalistic
-                if !task.subtasks.isEmpty {
-                    let completedSubtasks = task.subtasks.filter { $0.isCompleted }.count
-                    let totalSubtasks = task.subtasks.count
-                    HStack(spacing: DesignSystem.Spacing.xs) {
-                        Text("\(completedSubtasks)/\(totalSubtasks)")
-                            .font(DesignSystem.Typography.caption1) // Larger
-                            .foregroundColor(DesignSystem.Colors.textTertiary)
-
-                        ProgressView(value: Double(completedSubtasks), total: Double(totalSubtasks))
-                            .progressViewStyle(LinearProgressViewStyle(tint: DesignSystem.Colors.accentSecondary))
-                            .frame(height: 2)
-                    }
-                }
-            }
-
-            Spacer()
-
-            // Quick Actions - Minimalistic
-            HStack(spacing: DesignSystem.Spacing.xs) {
-                if !task.isCompleted {
-                    Button(action: {
-                        timerManager.startTimer(for: task)
-                    }) {
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(DesignSystem.Colors.timerActive)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-
+                // Completion toggle
                 Button(action: {
-                    // Use task ID to ensure we're working with the correct task
                     if let currentTask = taskManager.tasks.first(where: { $0.id == task.id }) {
                         taskManager.toggleTaskCompletion(currentTask)
                     }
                 }) {
-                    // Get current state from taskManager to ensure reactivity
                     let currentTask = taskManager.tasks.first(where: { $0.id == task.id })
                     let isCompleted = currentTask?.isCompleted ?? task.isCompleted
-
                     Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 20))
                         .foregroundColor(isCompleted ? DesignSystem.Colors.success : DesignSystem.Colors.textTertiary)
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(.plain)
+
+                // Task info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(task.title)
+                        .font(DesignSystem.Typography.callout)
+                        .fontWeight(.medium)
+                        .foregroundColor(DesignSystem.Colors.textPrimary)
+                        .strikethrough(task.isCompleted)
+                        .lineLimit(1)
+
+                    HStack(spacing: 8) {
+                        // Category badge
+                        Text(task.category)
+                            .font(DesignSystem.Typography.tiny)
+                            .foregroundColor(DesignSystem.Colors.accent)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule()
+                                    .fill(DesignSystem.Colors.accentMuted)
+                            )
+
+                        // Due date
+                        if task.isOverdue {
+                            HStack(spacing: 3) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 10))
+                                Text("Overdue")
+                            }
+                            .font(DesignSystem.Typography.tiny)
+                            .foregroundColor(DesignSystem.Colors.error)
+                        } else if task.isDueToday {
+                            Text("Today")
+                                .font(DesignSystem.Typography.tiny)
+                                .foregroundColor(DesignSystem.Colors.warning)
+                        } else if let _ = task.dueDate {
+                            Text(task.formattedDueDateShort)
+                                .font(DesignSystem.Typography.tiny)
+                                .foregroundColor(DesignSystem.Colors.textTertiary)
+                        }
+
+                        if task.recurringPattern != .none {
+                            Image(systemName: "repeat")
+                                .font(.system(size: 10))
+                                .foregroundColor(DesignSystem.Colors.textTertiary)
+                        }
+                    }
+
+                    // Subtask progress
+                    if !task.subtasks.isEmpty {
+                        subtaskProgress
+                    }
+                }
+
+                Spacer()
+
+                // Timer button
+                if !task.isCompleted {
+                    Button(action: {
+                        timerManager.startTimer(for: task)
+                    }) {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(DesignSystem.Colors.accent)
+                            .frame(width: 32, height: 32)
+                            .background(
+                                Circle()
+                                    .fill(DesignSystem.Colors.accentMuted)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(task.isOverdue ? DesignSystem.Colors.errorMuted : DesignSystem.Colors.surface)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(
+                        task.isOverdue ? DesignSystem.Colors.error.opacity(0.2) : DesignSystem.Colors.borderSubtle,
+                        lineWidth: 1
+                    )
+            )
         }
-        .cardPadding()
-        .background(
-            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium) // Larger radius
-                .fill(task.isOverdue ? DesignSystem.Colors.error.opacity(0.1) : DesignSystem.Colors.surface)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium)
-                .stroke(task.isOverdue ? DesignSystem.Colors.error.opacity(0.3) : DesignSystem.Colors.divider, lineWidth: 1)
-        )
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showingDetail) {
+            TaskDetailView(task: task)
+        }
+    }
+
+    var subtaskProgress: some View {
+        let completed = task.subtasks.filter { $0.isCompleted }.count
+        let total = task.subtasks.count
+        return HStack(spacing: 6) {
+            ProgressView(value: Double(completed), total: Double(total))
+                .progressViewStyle(LinearProgressViewStyle(tint: DesignSystem.Colors.accent))
+                .frame(width: 60, height: 3)
+            Text("\(completed)/\(total)")
+                .font(DesignSystem.Typography.tiny)
+                .foregroundColor(DesignSystem.Colors.textTertiary)
+        }
     }
 }
 
-struct TasksView_Previews: PreviewProvider {
-    static var previews: some View {
-        TasksView()
-            .environmentObject(TaskManager())
-            .environmentObject(TimerManager(taskManager: TaskManager()))
-    }
+#Preview {
+    TasksView()
+        .environmentObject(TaskManager())
+        .environmentObject(TimerManager(taskManager: TaskManager()))
 }

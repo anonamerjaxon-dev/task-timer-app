@@ -1,369 +1,501 @@
 import SwiftUI
 
-// MARK: - Design System for Minimalistic Black Theme (OLED Optimized)
+// MARK: - Design System v2 — Refined Dark Professional Theme
 
-/// Centralized design system for consistent, minimalistic black theme UI
-/// Optimized for OLED displays with pure blacks and high contrast
+/// Inspired by modern productivity tools (Linear, Things, Raycast)
+/// Deep charcoal base with subtle blue accents, generous spacing, soft rounded corners
 struct DesignSystem {
 
-    // MARK: - Colors (OLED-Optimized Black Theme)
+    // MARK: - Colors (Refined Dark Professional)
     struct Colors {
-        // Primary colors - Pure black OLED optimization
-        static let background = Color.black // Pure black for OLED power saving
-        static let surface = Color(white: 0.05) // Very dark gray, almost black
-        static let surfaceLight = Color(white: 0.08) // Slightly lighter for cards
-        static let surfaceLighter = Color(white: 0.12) // For elevated surfaces
+        // Background hierarchy — deep charcoal with subtle blue undertone
+        static let background = Color(hex: "#0D1117")
+        static let sidebar = Color(hex: "#0A0E13")
+        static let surfaceLow = Color(hex: "#131820")
+        static let surface = Color(hex: "#161B22")
+        static let surfaceHigh = Color(hex: "#1C2128")
+        static let surfaceHighest = Color(hex: "#21262D")
 
-        // Floating timer colors - subtle dark theme
-        static let floatingTimerBackground = Color(white: 0.03)
-        static let floatingTimerBackgroundAlt = Color(white: 0.06)
-        static let floatingTimerBorder = Color(white: 0.15)
+        // Text colors — warm white hierarchy
+        static let textPrimary = Color(hex: "#E6EDF3")
+        static let textSecondary = Color(hex: "#8B949E")
+        static let textTertiary = Color(hex: "#6E7681")
+        static let textDisabled = Color(hex: "#484F58")
 
-        // Text colors - Maximum contrast for OLED readability
-        static let textPrimary = Color.white // Pure white for maximum contrast
-        static let textSecondary = Color(white: 0.85) // High contrast secondary
-        static let textTertiary = Color(white: 0.65) // Medium contrast
-        static let textQuaternary = Color(white: 0.45) // For disabled states
+        // Accent — soft blue
+        static let accent = Color(hex: "#58A6FF")
+        static let accentMuted = Color(hex: "#58A6FF").opacity(0.15)
+        static let accentStrong = Color(hex: "#79C0FF")
 
-        // Accent colors - Monochromatic white/gray for minimalism
-        static let accent = Color.white
-        static let accentSecondary = Color(white: 0.9)
-        static let accentTertiary = Color(white: 0.75)
+        // Status colors
+        static let success = Color(hex: "#3FB950")
+        static let successMuted = Color(hex: "#3FB950").opacity(0.15)
+        static let warning = Color(hex: "#D29922")
+        static let warningMuted = Color(hex: "#D29922").opacity(0.15)
+        static let error = Color(hex: "#F85149")
+        static let errorMuted = Color(hex: "#F85149").opacity(0.15)
 
-        // Priority colors - Muted but visible on black background
-        static let priorityHigh = Color(red: 0.9, green: 0.3, blue: 0.3) // Muted red
-        static let priorityMedium = Color(red: 0.9, green: 0.6, blue: 0.2) // Muted orange
-        static let priorityLow = Color(red: 0.3, green: 0.8, blue: 0.4) // Muted green
+        // Priority colors — refined
+        static let priorityHigh = Color(hex: "#F85149")
+        static let priorityMedium = Color(hex: "#D29922")
+        static let priorityLow = Color(hex: "#58A6FF")
 
-        // Status colors - High contrast on black
-        static let success = Color(red: 0.2, green: 0.8, blue: 0.4) // Green
-        static let warning = Color(red: 0.9, green: 0.6, blue: 0.2) // Orange
-        static let error = Color(red: 0.9, green: 0.3, blue: 0.3) // Red
+        // Timer-specific
+        static let timerFocus = Color(hex: "#58A6FF")
+        static let timerBreak = Color(hex: "#3FB950")
+        static let timerPaused = Color(hex: "#D29922")
 
-        // Interactive states - Subtle variations on black
-        static let interactive = Color(white: 0.1)
-        static let interactiveHover = Color(white: 0.15)
-        static let interactivePressed = Color(white: 0.2)
-        static let interactiveDisabled = Color(white: 0.06)
+        // Borders & dividers
+        static let border = Color(hex: "#30363D")
+        static let borderSubtle = Color(hex: "#21262D")
+        static let divider = Color(hex: "#21262D")
 
-        // Timer-specific colors - Subtle accents
-        static let timerActive = Color(red: 0.2, green: 0.7, blue: 0.9) // Soft blue
-        static let timerBreak = Color(red: 0.3, green: 0.8, blue: 0.5) // Soft green
-        static let timerPaused = Color(red: 0.9, green: 0.6, blue: 0.2) // Soft orange
+        // Floating timer
+        static let floatingBg = Color(hex: "#0D1117").opacity(0.97)
+        static let floatingBorder = Color(hex: "#30363D").opacity(0.6)
 
-        // Card and container colors
-        static let cardBackground = Color(white: 0.04) // Very subtle elevation
-        static let divider = Color(white: 0.12) // Subtle dividers
+        // Glass effect
+        static let glassBg = Color(hex: "#161B22").opacity(0.85)
+        static let glassBorder = Color.white.opacity(0.06)
     }
 
-    // MARK: - Typography (Inter-inspired system font)
+    // MARK: - Typography (SF Pro Rounded)
     struct Typography {
-        // Minimalist type scale with Swiss-style hierarchy
-        static let largeTitle = Font.system(size: 34, weight: .light, design: .default)
-        static let title1 = Font.system(size: 28, weight: .light, design: .default)
-        static let title2 = Font.system(size: 22, weight: .light, design: .default)
-        static let title3 = Font.system(size: 20, weight: .medium, design: .default)
-        static let headline = Font.system(size: 18, weight: .semibold, design: .default)
-        static let body = Font.system(size: 16, weight: .regular, design: .default)
-        static let callout = Font.system(size: 15, weight: .regular, design: .default)
-        static let subheadline = Font.system(size: 14, weight: .regular, design: .default)
-        static let footnote = Font.system(size: 13, weight: .medium, design: .default)
-        static let caption1 = Font.system(size: 12, weight: .medium, design: .default)
-        static let caption2 = Font.system(size: 11, weight: .medium, design: .default)
+        // Display
+        static let largeTitle = Font.system(size: 34, weight: .bold, design: .rounded)
+        static let title1 = Font.system(size: 28, weight: .bold, design: .rounded)
+        static let title2 = Font.system(size: 22, weight: .semibold, design: .rounded)
+        static let title3 = Font.system(size: 20, weight: .semibold, design: .rounded)
 
-        // Additional sizes for better hierarchy
-        static let tiny = Font.system(size: 10, weight: .medium, design: .default)
+        // Body
+        static let headline = Font.system(size: 17, weight: .semibold, design: .rounded)
+        static let body = Font.system(size: 16, weight: .regular, design: .rounded)
+        static let callout = Font.system(size: 15, weight: .regular, design: .rounded)
+        static let subheadline = Font.system(size: 14, weight: .regular, design: .rounded)
+        static let footnote = Font.system(size: 13, weight: .regular, design: .rounded)
+        static let caption = Font.system(size: 12, weight: .medium, design: .rounded)
+        static let tiny = Font.system(size: 11, weight: .medium, design: .rounded)
 
-        // Timer specific - Ultra minimal, large display
-        static let timerLarge = Font.system(size: 56, weight: .ultraLight, design: .default)
-        static let timerMedium = Font.system(size: 24, weight: .light, design: .default)
-        static let timerSmall = Font.system(size: 18, weight: .light, design: .default)
+        // Timer
+        static let timerLarge = Font.system(size: 64, weight: .thin, design: .rounded)
+        static let timerMedium = Font.system(size: 28, weight: .light, design: .rounded)
+        static let timerSmall = Font.system(size: 18, weight: .regular, design: .rounded)
 
-        // Monospaced for numbers - Clean timer display
-        static let monospacedLarge = Font.system(size: 56, weight: .ultraLight, design: .monospaced)
-        static let monospacedMedium = Font.system(size: 18, weight: .regular, design: .monospaced)
-        static let monospacedSmall = Font.system(size: 14, weight: .regular, design: .monospaced)
+        // Monospaced
+        static let monoLarge = Font.system(size: 64, weight: .thin, design: .monospaced)
+        static let monoMedium = Font.system(size: 18, weight: .regular, design: .monospaced)
+        static let monoSmall = Font.system(size: 14, weight: .regular, design: .monospaced)
+
+        // Sidebar
+        static let sidebarTitle = Font.system(size: 13, weight: .semibold, design: .rounded)
+        static let sidebarItem = Font.system(size: 13, weight: .regular, design: .rounded)
     }
 
-    // MARK: - Spacing (8pt grid system)
+    // MARK: - Spacing (4pt grid)
     struct Spacing {
-        // Minimalist spacing scale - generous whitespace
         static let xs: CGFloat = 4
         static let sm: CGFloat = 8
-        static let md: CGFloat = 16
-        static let lg: CGFloat = 24
-        static let xl: CGFloat = 32
-        static let xxl: CGFloat = 48
-        static let xxxl: CGFloat = 64
+        static let md: CGFloat = 12
+        static let lg: CGFloat = 16
+        static let xl: CGFloat = 20
+        static let xxl: CGFloat = 24
+        static let xxxl: CGFloat = 32
+        static let huge: CGFloat = 40
 
-        // Additional spacing for specific use cases
+        // Legacy aliases for compatibility
         static let quarter: CGFloat = 2
         static let half: CGFloat = 6
         static let oneAndHalf: CGFloat = 12
         static let twoAndHalf: CGFloat = 20
     }
 
-    // MARK: - Corner Radius (Minimal, consistent)
+    // MARK: - Corner Radius
     struct CornerRadius {
-        // Minimal corner radius - subtle rounding
-        static let small: CGFloat = 6
-        static let medium: CGFloat = 10
-        static let large: CGFloat = 14
-        static let xlarge: CGFloat = 18
-        static let circle: CGFloat = 999
-
-        // Subtle radius for minimal elements
         static let subtle: CGFloat = 4
+        static let small: CGFloat = 8
+        static let medium: CGFloat = 12
+        static let large: CGFloat = 16
+        static let xlarge: CGFloat = 20
+        static let circle: CGFloat = 999
     }
 
-    // MARK: - Line Widths (Thicker for better visibility)
+    // MARK: - Line Widths
     struct LineWidth {
         static let hairline: CGFloat = 0.5
         static let thin: CGFloat = 1.0
-        static let regular: CGFloat = 1.5  // Increased from typical 1.0
-        static let medium: CGFloat = 2.0   // Increased
-        static let thick: CGFloat = 3.0    // Increased
-        static let bold: CGFloat = 4.0     // New for emphasis
+        static let regular: CGFloat = 1.5
+        static let medium: CGFloat = 2.0
+        static let thick: CGFloat = 3.0
     }
 
-    // MARK: - Animation (Subtle, fast)
+    // MARK: - Animation
     struct Animation {
-        static let quick = SwiftUI.Animation.easeInOut(duration: 0.12)
-        static let standard = SwiftUI.Animation.easeInOut(duration: 0.2)
-        static let gentle = SwiftUI.Animation.easeInOut(duration: 0.3)
+        static let instant = SwiftUI.Animation.easeOut(duration: 0.1)
+        static let quick = SwiftUI.Animation.easeOut(duration: 0.15)
+        static let standard = SwiftUI.Animation.spring(response: 0.3, dampingFraction: 0.8)
+        static let gentle = SwiftUI.Animation.spring(response: 0.4, dampingFraction: 0.8)
+        static let snappy = SwiftUI.Animation.spring(response: 0.25, dampingFraction: 0.7)
     }
 
-    // MARK: - Shadows (Minimal for dark theme)
+    // MARK: - Shadows
     struct Shadows {
-        static let subtle = Color.black.opacity(0.2)
-        static let medium = Color.black.opacity(0.4)
-        static let strong = Color.black.opacity(0.6)
+        static let subtle = Color.black.opacity(0.3)
+        static let medium = Color.black.opacity(0.5)
+        static let strong = Color.black.opacity(0.7)
+        static let glow = Color(hex: "#58A6FF").opacity(0.2)
+    }
+
+    // MARK: - Layout
+    struct Layout {
+        static let sidebarWidth: CGFloat = 220
+        static let sidebarMinWidth: CGFloat = 180
+        static let sidebarMaxWidth: CGFloat = 280
+        static let windowMinWidth: CGFloat = 780
+        static let windowMinHeight: CGFloat = 520
+        static let contentMaxWidth: CGFloat = 680
     }
 }
 
-// MARK: - View Modifiers for Consistent Styling
+// MARK: - Color Hex Extension
 
-/// Minimal button style for clean, black theme
-struct MinimalButtonStyle: ButtonStyle {
-    let variant: Variant
-    let size: ButtonSize
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 6:
+            (a, r, g, b) = (255, (int >> 16) & 0xFF, (int >> 8) & 0xFF, int & 0xFF)
+        case 8:
+            (a, r, g, b) = ((int >> 24) & 0xFF, (int >> 16) & 0xFF, (int >> 8) & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+}
 
-    enum Variant {
-        case primary
-        case secondary
-        case destructive
-        case ghost
-        case success
+// MARK: - View Modifiers
+
+/// Refined card style with subtle depth
+struct CardModifier: ViewModifier {
+    let elevated: Bool
+    let accent: Bool
+
+    init(elevated: Bool = false, accent: Bool = false) {
+        self.elevated = elevated
+        self.accent = accent
     }
 
-    enum ButtonSize {
-        case small
-        case medium
-        case large
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium)
+                    .fill(elevated ? DesignSystem.Colors.surfaceHigh : DesignSystem.Colors.surface)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium)
+                    .stroke(
+                        accent ? DesignSystem.Colors.accent.opacity(0.3) : DesignSystem.Colors.borderSubtle,
+                        lineWidth: 1
+                    )
+            )
+    }
+}
 
-        var padding: (horizontal: CGFloat, vertical: CGFloat) {
-            switch self {
-            case .small:
-                return (DesignSystem.Spacing.sm, DesignSystem.Spacing.xs)
-            case .medium:
-                return (DesignSystem.Spacing.md, DesignSystem.Spacing.sm)
-            case .large:
-                return (DesignSystem.Spacing.lg, DesignSystem.Spacing.md)
-            }
-        }
+/// Glass-morphism container for overlays
+struct GlassModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.large)
+                    .fill(DesignSystem.Colors.glassBg)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.large)
+                    .stroke(DesignSystem.Colors.glassBorder, lineWidth: 1)
+            )
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.large)
+                    .fill(.ultraThinMaterial)
+            )
+    }
+}
+
+/// Modern primary button style
+struct PrimaryButtonStyle: ButtonStyle {
+    let size: ButtonSize
+    let fullWidth: Bool
+
+    enum ButtonSize {
+        case small, medium, large
 
         var font: Font {
             switch self {
-            case .small:
-                return DesignSystem.Typography.caption1
-            case .medium:
-                return DesignSystem.Typography.subheadline
-            case .large:
-                return DesignSystem.Typography.callout
+            case .small: return DesignSystem.Typography.caption
+            case .medium: return DesignSystem.Typography.subheadline
+            case .large: return DesignSystem.Typography.callout
+            }
+        }
+
+        var padding: (h: CGFloat, v: CGFloat) {
+            switch self {
+            case .small: return (12, 6)
+            case .medium: return (16, 8)
+            case .large: return (20, 10)
             }
         }
     }
 
-    init(variant: Variant, size: ButtonSize = .medium) {
-        self.variant = variant
+    init(size: ButtonSize = .medium, fullWidth: Bool = false) {
         self.size = size
+        self.fullWidth = fullWidth
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(size.font)
+            .fontWeight(.semibold)
+            .foregroundColor(.white)
+            .padding(.horizontal, size.padding.h)
+            .padding(.vertical, size.padding.v)
+            .frame(minHeight: 36)
+            .frame(maxWidth: fullWidth ? .infinity : nil)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.small)
+                    .fill(configuration.isPressed ? DesignSystem.Colors.accentStrong : DesignSystem.Colors.accent)
+            )
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(DesignSystem.Animation.instant, value: configuration.isPressed)
+    }
+}
+
+/// Secondary / ghost button
+struct SecondaryButtonStyle: ButtonStyle {
+    let size: PrimaryButtonStyle.ButtonSize
+    let fullWidth: Bool
+
+    init(size: PrimaryButtonStyle.ButtonSize = .medium, fullWidth: Bool = false) {
+        self.size = size
+        self.fullWidth = fullWidth
     }
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(size.font)
             .fontWeight(.medium)
-            .foregroundColor(textColor)
-            .padding(.horizontal, size.padding.horizontal)
-            .padding(.vertical, size.padding.vertical)
-            .frame(minHeight: 44)
-            .background(backgroundColor(for: configuration))
-            .cornerRadius(DesignSystem.CornerRadius.small)
+            .foregroundColor(DesignSystem.Colors.textSecondary)
+            .padding(.horizontal, size.padding.h)
+            .padding(.vertical, size.padding.v)
+            .frame(minHeight: 36)
+            .frame(maxWidth: fullWidth ? .infinity : nil)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.small)
+                    .fill(configuration.isPressed ? DesignSystem.Colors.surfaceHighest : DesignSystem.Colors.surface)
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.small)
-                    .stroke(borderColor, lineWidth: borderWidth)
+                    .stroke(DesignSystem.Colors.border, lineWidth: 1)
             )
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .animation(DesignSystem.Animation.quick, value: configuration.isPressed)
-    }
-
-    private var textColor: Color {
-        switch variant {
-        case .primary: return DesignSystem.Colors.background
-        case .secondary: return DesignSystem.Colors.textPrimary
-        case .ghost: return DesignSystem.Colors.textSecondary
-        case .destructive: return DesignSystem.Colors.error
-        case .success: return DesignSystem.Colors.success
-        }
-    }
-
-    private func backgroundColor(for configuration: Configuration) -> Color {
-        let baseColor: Color
-        switch variant {
-        case .primary: baseColor = DesignSystem.Colors.accent
-        case .secondary: baseColor = DesignSystem.Colors.interactive
-        case .destructive: baseColor = DesignSystem.Colors.error.opacity(0.1)
-        case .ghost: baseColor = Color.clear
-        case .success: baseColor = DesignSystem.Colors.success.opacity(0.1)
-        }
-
-        if configuration.isPressed {
-            return baseColor.opacity(0.8)
-        }
-        return baseColor
-    }
-
-    private var borderColor: Color {
-        switch variant {
-        case .primary, .ghost: return Color.clear
-        case .secondary: return DesignSystem.Colors.divider
-        case .destructive: return DesignSystem.Colors.error.opacity(0.2)
-        case .success: return DesignSystem.Colors.success.opacity(0.2)
-        }
-    }
-
-    private var borderWidth: CGFloat {
-        switch variant {
-        case .primary, .ghost: return 0
-        case .secondary, .destructive, .success: return DesignSystem.LineWidth.medium // Thicker borders
-        }
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(DesignSystem.Animation.instant, value: configuration.isPressed)
     }
 }
 
-/// Minimal card style for dark theme
-struct CardStyle: ViewModifier {
-    let elevated: Bool
-    let bordered: Bool
-
-    init(elevated: Bool = false, bordered: Bool = true) {
-        self.elevated = elevated
-        self.bordered = bordered
-    }
-
-    func body(content: Content) -> some View {
-        content
-            .background(DesignSystem.Colors.cardBackground)
-            .cornerRadius(DesignSystem.CornerRadius.medium)
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.medium)
-                    .stroke(bordered ? DesignSystem.Colors.divider : Color.clear, lineWidth: DesignSystem.LineWidth.medium) // Thicker borders
+/// Destructive button
+struct DestructiveButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(DesignSystem.Typography.subheadline)
+            .fontWeight(.medium)
+            .foregroundColor(DesignSystem.Colors.error)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .frame(minHeight: 36)
+            .background(
+                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.small)
+                    .fill(configuration.isPressed ? DesignSystem.Colors.errorMuted : DesignSystem.Colors.errorMuted.opacity(0.6))
             )
-            .shadow(
-                color: elevated ? DesignSystem.Shadows.medium : DesignSystem.Shadows.subtle,
-                radius: elevated ? 6 : 2,
-                x: 0,
-                y: elevated ? 2 : 1
-            )
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(DesignSystem.Animation.instant, value: configuration.isPressed)
     }
 }
 
-/// Minimal tab button style for navigation
-struct TabButtonStyle: ButtonStyle {
-    let isSelected: Bool
+/// Icon button (circular, for play/pause etc.)
+struct IconButtonStyle: ButtonStyle {
+    let color: Color
+    let size: CGFloat
+
+    init(color: Color = DesignSystem.Colors.textSecondary, size: CGFloat = 36) {
+        self.color = color
+        self.size = size
+    }
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundColor(isSelected ? DesignSystem.Colors.textPrimary : DesignSystem.Colors.textTertiary)
-            .font(DesignSystem.Typography.subheadline)
-            .fontWeight(isSelected ? .semibold : .regular)
-            .padding(.horizontal, DesignSystem.Spacing.md)
-            .padding(.vertical, DesignSystem.Spacing.sm)
-            .frame(minWidth: 80, minHeight: 44)
+            .font(.system(size: size * 0.45, weight: .medium))
+            .foregroundColor(color)
+            .frame(width: size, height: size)
             .background(
-                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.small)
-                    .fill(isSelected ? DesignSystem.Colors.surfaceLight : Color.clear)
+                Circle()
+                    .fill(configuration.isPressed ? DesignSystem.Colors.surfaceHighest : DesignSystem.Colors.surface)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.small)
-                    .stroke(isSelected ? DesignSystem.Colors.accentSecondary : Color.clear, lineWidth: DesignSystem.LineWidth.regular) // Thicker borders
+                Circle()
+                    .stroke(DesignSystem.Colors.borderSubtle, lineWidth: 1)
             )
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .animation(DesignSystem.Animation.quick, value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .animation(DesignSystem.Animation.instant, value: configuration.isPressed)
     }
 }
 
-// MARK: - Extensions for Easy Usage
+// MARK: - View Extensions
 
 extension View {
-    func minimalButtonStyle(_ variant: MinimalButtonStyle.Variant = .primary, size: MinimalButtonStyle.ButtonSize = .medium) -> some View {
-        buttonStyle(MinimalButtonStyle(variant: variant, size: size))
+    func cardStyle(elevated: Bool = false, accent: Bool = false) -> some View {
+        modifier(CardModifier(elevated: elevated, accent: accent))
     }
 
-    func cardStyle(elevated: Bool = false, bordered: Bool = true) -> some View {
-        modifier(CardStyle(elevated: elevated, bordered: bordered))
+    func glassStyle() -> some View {
+        modifier(GlassModifier())
     }
 
-    func tabButtonStyle(isSelected: Bool) -> some View {
-        buttonStyle(TabButtonStyle(isSelected: isSelected))
+    func primaryButtonStyle(size: PrimaryButtonStyle.ButtonSize = .medium, fullWidth: Bool = false) -> some View {
+        buttonStyle(PrimaryButtonStyle(size: size, fullWidth: fullWidth))
     }
 
-    // New utility modifiers for better spacing and layout
-    func sectionPadding() -> some View {
-        padding(.horizontal, DesignSystem.Spacing.lg)
-            .padding(.vertical, DesignSystem.Spacing.md)
+    func secondaryButtonStyle(size: PrimaryButtonStyle.ButtonSize = .medium, fullWidth: Bool = false) -> some View {
+        buttonStyle(SecondaryButtonStyle(size: size, fullWidth: fullWidth))
     }
 
-    func contentPadding() -> some View {
-        padding(DesignSystem.Spacing.md)
+    func destructiveButtonStyle() -> some View {
+        buttonStyle(DestructiveButtonStyle())
     }
 
-    func cardPadding() -> some View {
-        padding(DesignSystem.Spacing.sm)
+    func iconButtonStyle(color: Color = DesignSystem.Colors.textSecondary, size: CGFloat = 36) -> some View {
+        buttonStyle(IconButtonStyle(color: color, size: size))
     }
 }
 
-// MARK: - Simple Clock Icon Component
+// MARK: - Shared Components
+
+/// Section header used across views
+struct SectionHeader: View {
+    let title: String
+    let count: Int?
+    let color: Color
+
+    init(title: String, count: Int? = nil, color: Color = DesignSystem.Colors.accent) {
+        self.title = title
+        self.count = count
+        self.color = color
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(color)
+                .frame(width: 6, height: 6)
+
+            Text(title)
+                .font(DesignSystem.Typography.headline)
+                .foregroundColor(DesignSystem.Colors.textPrimary)
+
+            if let count = count {
+                Text("\(count)")
+                    .font(DesignSystem.Typography.footnote)
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(DesignSystem.Colors.surfaceHigh)
+                    )
+            }
+
+            Spacer()
+        }
+    }
+}
+
+/// Empty state placeholder
+struct EmptyState: View {
+    let icon: String
+    let title: String
+    let message: String
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 36, weight: .light))
+                .foregroundColor(DesignSystem.Colors.textTertiary)
+
+            Text(title)
+                .font(DesignSystem.Typography.headline)
+                .foregroundColor(DesignSystem.Colors.textSecondary)
+
+            Text(message)
+                .font(DesignSystem.Typography.footnote)
+                .foregroundColor(DesignSystem.Colors.textTertiary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 48)
+    }
+}
+
+/// Priority badge
+struct PriorityBadge: View {
+    let priority: Priority
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(Color.taskPriority(priority))
+                .frame(width: 6, height: 6)
+            Text(priority.displayName)
+                .font(DesignSystem.Typography.caption)
+                .foregroundColor(Color.taskPriority(priority))
+        }
+    }
+}
+
+/// Clock icon
 struct ClockIcon: View {
     let size: CGFloat
     let color: Color
 
-    init(size: CGFloat = 16, color: Color = DesignSystem.Colors.textPrimary) {
+    init(size: CGFloat = 16, color: Color = DesignSystem.Colors.textSecondary) {
         self.size = size
         self.color = color
     }
 
     var body: some View {
         ZStack {
-            // Clock circle
             Circle()
-                .stroke(color, lineWidth: DesignSystem.LineWidth.regular) // Thicker
+                .stroke(color, lineWidth: 1.5)
                 .frame(width: size, height: size)
 
-            // Clock hands
             Rectangle()
                 .fill(color)
-                .frame(width: DesignSystem.LineWidth.medium, height: size * 0.3) // Thicker
+                .frame(width: 1.5, height: size * 0.3)
                 .offset(y: -size * 0.15)
 
             Rectangle()
                 .fill(color)
-                .frame(width: DesignSystem.LineWidth.regular, height: size * 0.2) // Thicker
+                .frame(width: 1.5, height: size * 0.2)
                 .offset(x: size * 0.1, y: -size * 0.1)
 
-            // Center dot
             Circle()
                 .fill(color)
-                .frame(width: DesignSystem.LineWidth.bold, height: DesignSystem.LineWidth.bold) // Bigger
+                .frame(width: 3, height: 3)
         }
     }
 }

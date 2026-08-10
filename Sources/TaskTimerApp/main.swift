@@ -9,7 +9,7 @@ struct TaskTimerApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appBlockerManager)
-                .frame(minWidth: 900, minHeight: 600)
+                .frame(minWidth: DesignSystem.Layout.windowMinWidth, minHeight: DesignSystem.Layout.windowMinHeight)
                 .preferredColorScheme(.dark)
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
