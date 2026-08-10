@@ -88,7 +88,7 @@ struct FloatingTimerWindow: View {
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
         .gesture(
-            DragGesture(coordinateSpace: .global)
+            DragGesture(minimumDistance: 10, coordinateSpace: .global)
                 .onChanged { value in
                     if let window = NSApp.windows.first(where: { $0.level == .floating }) {
                         if initialWindowOrigin == nil {

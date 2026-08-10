@@ -34,13 +34,12 @@ final class FloatingTimerManager: ObservableObject {
             window.contentView = hostingView
             window.isReleasedWhenClosed = false
             window.level = .floating
-            window.isMovableByWindowBackground = true
             window.backgroundColor = .clear
             window.isOpaque = false
             window.hasShadow = false
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
-            window.collectionBehavior = [.fullScreenAuxiliary, .canJoinAllSpaces, .stationary]
+            window.collectionBehavior = [.fullScreenAuxiliary, .canJoinAllSpaces]
             window.hidesOnDeactivate = false
             window.acceptsMouseMovedEvents = true
             window.appearance = NSAppearance(named: .darkAqua)
