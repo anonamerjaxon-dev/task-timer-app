@@ -20,12 +20,12 @@ final class FloatingTimerManager: ObservableObject {
         if floatingWindow == nil {
             let content = FloatingTimerWindow(timerManager: timerManager)
             let hostingView = NSHostingView(rootView: content)
-            hostingView.frame = NSRect(x: 0, y: 0, width: 320, height: 70)
+            hostingView.frame = NSRect(x: 0, y: 0, width: 340, height: 80)
             hostingView.wantsLayer = true
             hostingView.layer?.backgroundColor = NSColor.clear.cgColor
 
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 320, height: 70),
+                contentRect: NSRect(x: 0, y: 0, width: 340, height: 80),
                 styleMask: [.borderless],
                 backing: .buffered,
                 defer: false

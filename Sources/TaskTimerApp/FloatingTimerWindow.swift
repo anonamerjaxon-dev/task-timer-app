@@ -3,7 +3,7 @@ import AppKit
 
 struct FloatingTimerWindow: View {
     @ObservedObject var timerManager: TimerManager
-    @State private var isDragging = false
+    @State private var initialWindowOrigin: NSPoint?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -90,19 +90,18 @@ struct FloatingTimerWindow: View {
         .gesture(
             DragGesture(coordinateSpace: .global)
                 .onChanged { value in
-                    if !isDragging {
-                        isDragging = true
-                    }
                     if let window = NSApp.windows.first(where: { $0.level == .floating }) {
-                        let newOrigin = NSPoint(
-                            x: window.frame.origin.x + value.translation.width,
-                            y: window.frame.origin.y - value.translation.height
-                        )
-                        window.setFrameOrigin(newOrigin)
+                        if initialWindowOrigin == nil {
+                            initialWindowOrigin = window.frame.origin
+                        }
+                        window.setFrameOrigin(NSPoint(
+                            x: initialWindowOrigin!.x + value.translation.width,
+                            y: initialWindowOrigin!.y - value.translation.height
+                        ))
                     }
                 }
                 .onEnded { _ in
-                    isDragging = false
+                    initialWindowOrigin = nil
                 }
         )
         .contextMenu {
