@@ -8,6 +8,7 @@ extension Notification.Name {
     static let timerDidComplete = Notification.Name("timerDidComplete")
     static let timerDidPause = Notification.Name("timerDidPause")
     static let timerDidResume = Notification.Name("timerDidResume")
+    static let unclosableModeDidChange = Notification.Name("unclosableModeDidChange")
 }
 
 // MARK: - Timer Manager

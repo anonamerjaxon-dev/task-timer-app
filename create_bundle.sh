@@ -8,7 +8,7 @@ swift package clean
 rm -rf .build
 
 # Build for release
-swift build -c release
+swift build -c release --disable-sandbox
 
 # Create app bundle structure
 echo "Creating app bundle..."

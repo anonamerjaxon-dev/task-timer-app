@@ -1,8 +1,9 @@
 import SwiftUI
 import AppKit
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var appBlockerManager: AppBlockerManager?
+    private var mainWindow: NSWindow?
 
     func isInUnclosableMode() -> Bool {
         return appBlockerManager?.isUnclosableMode ?? false
@@ -11,12 +12,63 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.appearance = NSAppearance(named: .darkAqua)
         NSApp.activate(ignoringOtherApps: true)
-        configureWindowsForAllDesktops()
+
+        // Listen for unclosable mode changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleUnclosableModeChange),
+            name: .unclosableModeDidChange,
+            object: nil
+        )
+
+        // SwiftUI creates the window asynchronously, so find it after a short delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.setupMainWindow()
+        }
     }
 
-    private func configureWindowsForAllDesktops() {
-        for window in NSApp.windows {
-            window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+    private func setupMainWindow() {
+        mainWindow = NSApp.windows.first { $0.level != .floating }
+        mainWindow?.delegate = self
+        updateWindowButtons()
+    }
+
+    @objc private func handleUnclosableModeChange() {
+        // Re-find main window in case it was recreated
+        if mainWindow == nil {
+            mainWindow = NSApp.windows.first { $0.level != .floating }
+            mainWindow?.delegate = self
+        }
+        updateWindowButtons()
+    }
+
+    private func updateWindowButtons() {
+        guard let window = mainWindow else { return }
+        let isUnclosable = appBlockerManager?.isUnclosableMode ?? false
+
+        window.standardWindowButton(.closeButton)?.isHidden = isUnclosable
+        window.standardWindowButton(.miniaturizeButton)?.isHidden = isUnclosable
+        window.standardWindowButton(.zoomButton)?.isHidden = isUnclosable
+    }
+
+    // MARK: - NSWindowDelegate
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        // Prevent closing the main window in unclosable mode
+        if appBlockerManager?.isUnclosableMode == true {
+            return false
+        }
+        return true
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow,
+              window == mainWindow else { return }
+
+        // When unclosable is OFF and main window closes, close floating timer
+        // so the app can terminate cleanly
+        if appBlockerManager?.isUnclosableMode == false {
+            FloatingTimerManager.shared.hideFloatingTimer()
         }
     }
 
@@ -32,7 +84,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Prevent Termination in Unclosable Mode
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        if let blockerManager = appBlockerManager, blockerManager.isUnclosableMode {
+        if appBlockerManager?.isUnclosableMode == true {
             showAllWindows()
             NSApp.activate(ignoringOtherApps: true)
             return .terminateCancel
@@ -41,29 +93,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        if let blockerManager = appBlockerManager, blockerManager.isUnclosableMode {
+        if appBlockerManager?.isUnclosableMode == true {
             return false
         }
         return true
     }
 
+    // MARK: - Dock Icon Click
+
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if let blockerManager = appBlockerManager, blockerManager.isUnclosableMode {
-            showAllWindows()
-            return false
-        } else if !flag {
-            return true
-        } else {
-            for window in NSApp.windows {
-                window.makeKeyAndOrderFront(nil)
-            }
-            return false
-        }
+        // Always restore windows when dock icon is clicked, regardless of mode
+        showAllWindows()
+        return false
     }
 
-    // MARK: - Prevent Hiding
+    // MARK: - Prevent Hiding in Unclosable Mode
+
     func applicationDidResignActive(_ notification: Notification) {
-        if let blockerManager = appBlockerManager, blockerManager.isUnclosableMode {
+        if appBlockerManager?.isUnclosableMode == true {
             DispatchQueue.main.async {
                 NSApp.activate(ignoringOtherApps: true)
             }
@@ -71,13 +118,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidHide(_ notification: Notification) {
-        if let blockerManager = appBlockerManager, blockerManager.isUnclosableMode {
+        if appBlockerManager?.isUnclosableMode == true {
             DispatchQueue.main.async {
                 NSApp.unhide(nil)
                 NSApp.activate(ignoringOtherApps: true)
             }
         }
     }
+
+    // MARK: - Helpers
 
     private func showAllWindows() {
         for window in NSApp.windows {

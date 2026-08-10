@@ -45,6 +45,7 @@ class AppBlockerManager: ObservableObject {
     func toggleUnclosableMode() {
         isUnclosableMode.toggle()
         saveUnclosableMode()
+        NotificationCenter.default.post(name: .unclosableModeDidChange, object: nil)
     }
     
     private func addDefaultBlockedApps() {
