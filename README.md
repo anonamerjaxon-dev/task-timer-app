@@ -379,7 +379,7 @@ Contributions are welcome! Please follow these guidelines:
 
 ## License
 
-This project is proprietary software. All rights reserved.
+MIT — see [LICENSE](./LICENSE).
 
 ## Support
 
